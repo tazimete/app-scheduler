@@ -5,8 +5,12 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt.android) apply true
-    id("kotlin-kapt")
+//    alias(libs.plugins.hilt.android)
+//    alias(libs.plugins.ksp)
+//    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
+    id ("kotlin-parcelize")
 }
 
 android {
@@ -56,16 +60,27 @@ dependencies {
     // Added dependencies
     implementation("javax.inject:javax.inject:1")
     implementation(libs.gson)
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
-    implementation("com.google.dagger:dagger:2.51.1")
-    kapt("com.google.dagger:dagger-compiler:2.51.1")
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("io.coil-kt:coil:2.6.0")
-    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    implementation ("androidx.navigation:navigation-compose:2.9.3")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
+
+
+    // Hilt dependencies
+    implementation(libs.hilt)
+    ksp("com.google.dagger:hilt-android-compiler:2.57")
+    val room_version = "2.7.2"
+
+    implementation("androidx.room:room-runtime:${room_version}")
+    ksp("androidx.room:room-compiler:$room_version")
+
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation ("androidx.compose.material:material-icons-extended")
+    implementation(libs.sdp.android)
+    implementation("com.google.maps.android:maps-compose:4.0.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
     // Test dependencies (duplicates removed, only one instance kept)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
