@@ -9,6 +9,7 @@ lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
 composeBom = "2024.09.00"
 hilt = "2.51.1"
+hiltPlugin = "2.51.1"
 navigationCompose = "2.7.7"
 coilCompose = "2.6.0"
 hiltNavigationCompose = "1.2.0"
@@ -45,3 +46,4 @@ javapoet = { group = "com.squareup", name = "javapoet", version.ref = "javapoet"
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltPlugin" }

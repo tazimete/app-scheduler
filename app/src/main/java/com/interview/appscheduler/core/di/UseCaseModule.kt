@@ -14,5 +14,5 @@ import kotlinx.coroutines.flow.Flow
 @InstallIn(ViewModelComponent::class)
 abstract class UseCaseModule {
     @Binds
-    abstract fun provideGetAllAppListUseCase(getAllAppListUseCase: GetAllAppListUseCase): AbstractUseCase<Flow<Result<Entity<kotlin.collections.List<AppEntity>>>>, Unit>
+    abstract fun provideGetAllAppListUseCase(getAllAppListUseCase: GetAllAppListUseCase): AbstractUseCase<Flow<Result<Entity<List<AppEntity>>>>, Unit>
 }
