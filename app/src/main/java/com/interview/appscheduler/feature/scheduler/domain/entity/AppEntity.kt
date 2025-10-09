@@ -4,21 +4,21 @@ import com.google.gson.annotations.SerializedName
 
 data class AppEntity(
     @SerializedName("id")
-    val id: Int,
+    val id: Int? = null,
     @SerializedName("appId")
-    val appId: Int,
+    val appId: Int? = null,
     @SerializedName("code")
-    val code: String,
+    val code: String? = null,
     @SerializedName("name")
-    val name: String,
+    val name: String? = null,
     @SerializedName("packageName")
-    val packageName: String,
+    val packageName: String? = null,
     @SerializedName("thumbnail")
-    val thumbnail: String,
+    val thumbnail: String? = null,
     @SerializedName("isScheduled")
-    val isScheduled: Boolean,
+    val isScheduled: Boolean? = false,
     @SerializedName("scheduledTime")
-    val scheduledTime: String,
+    val scheduledTime: String? = null,
     @SerializedName("installedTime")
-    val installedTime: String
+    val installedTime: String? = null
 )
