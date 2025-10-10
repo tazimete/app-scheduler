@@ -24,10 +24,11 @@ class AppSchedulerViewModel @Inject constructor(
     val appListUIState = _appListUIState.asStateFlow()
 
     init {
+        getAllAppList()
     }
 
     fun getAllAppList() {
-        _appListUIState.value = _appListUIState.value.copy(isLoading = true, errorMessage = null)
+        _appListUIState.value = _appListUIState.value.copy(isLoading = true, message = null)
 
         viewModelScope.launch(dispatcherProvider.main) {
             getAllAppListUseCase.invoke()
@@ -47,7 +48,8 @@ class AppSchedulerViewModel @Inject constructor(
 
             _appListUIState.value = _appListUIState.value.copy(
                 isLoading = false,
-                errorMessage = null,
+                message = null,
+                code = 200,
                 data = it
             )
         } ?: run {
@@ -65,7 +67,9 @@ class AppSchedulerViewModel @Inject constructor(
 
         _appListUIState.value = _appListUIState.value.copy(
             isLoading = false,
-            errorMessage = when (errorEntity) {
+            data = emptyList(),
+            code = 404,
+            message = when (errorEntity) {
                 is ErrorEntity.NetworkError -> "Network connection error. Please try again."
                 is ErrorEntity.ServerError -> "Server error. Please try again later."
                 is ErrorEntity.DecodingError -> "Internal error, Contact with your admin."

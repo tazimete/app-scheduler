@@ -1,5 +1,6 @@
 package com.interview.appscheduler.feature.scheduler.presentation.view
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.interview.appscheduler.R
+import com.interview.appscheduler.component.NoDataView
 import com.interview.appscheduler.feature.scheduler.presentation.view.subview.AppItemView
 import com.interview.appscheduler.feature.scheduler.presentation.viewmodel.AppSchedulerViewModel
 
@@ -120,10 +124,13 @@ fun AppSchedulerView(
                     )
                 }
 
+                if(appListUiState.data.isEmpty()) {
+                    NoDataView(details = "There is no scheduled app available. Please add a schedule.")
+                }
+
                 Spacer(Modifier.height(20.dp))
 
                 AddScheduleButton(
-                    count = 10,
                     onClick = {
 
                     }
@@ -137,7 +144,6 @@ fun AppSchedulerView(
 
 @Composable
 fun AddScheduleButton(
-    count: Int,
     onClick: () -> Unit
 ) {
     Button(
@@ -153,7 +159,7 @@ fun AddScheduleButton(
         )
     ) {
         Text(
-            text = "Assign Task ($count)",
+            text = "Add Schedule",
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )
