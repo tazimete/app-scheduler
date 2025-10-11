@@ -34,8 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.interview.appscheduler.component.NoDataView
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.presentation.view.subview.AppItemView
@@ -48,9 +46,7 @@ fun ScheduledAppListView(
     viewModel: AppSchedulerViewModel = hiltViewModel<AppSchedulerViewModel>(),
     coordinator: ScheduledAppListCoordinator,
 )  {
-    val navController: NavController = rememberNavController()
     val scrollState = rememberScrollState()
-
     val appListUiState by viewModel.appListUIState.collectAsState()
 
     // Bottom sheet state

@@ -21,7 +21,7 @@ fun SchedulerAppRoot(navController: NavHostController = rememberNavController())
         }
 
         composable(NavigationItem.InstalledAppList.route) {
-            InstalledAppListView()
+            InstalledAppListView(coordinator = ScheduledAppListCoordinator(navController))
         }
     }
 }

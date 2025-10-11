@@ -1,9 +1,5 @@
 package com.interview.appscheduler.feature.scheduler.presentation.view.subview
 
-import android.R
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,27 +23,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.size.Scale
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @Composable
 fun AppItemView(
@@ -57,17 +46,7 @@ fun AppItemView(
     onClickAdd: () -> Unit = {},
     onClickDelete: () -> Unit = {}
 ) {
-    var imageRequest by remember { mutableStateOf<ImageRequest?>(null) }
     val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        imageRequest = withContext(Dispatchers.Default) {
-            ImageRequest.Builder(context)
-                .data("https://randomuser.me/api/portraits/men/1.jpg")
-                .crossfade(true)
-                .build()
-        }
-    }
 
     Row(
         modifier = Modifier
@@ -76,21 +55,18 @@ fun AppItemView(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-//        AsyncImage(
-//            model = imageRequest,
-//            contentDescription = "POSM Product Image",
-//            modifier = Modifier
-//                .size(50.dp)
-//                .clip(RoundedCornerShape(8.dp))
-//                .background(Color.Gray)
-//        )
-
-        DrawableImage(
-            drawable = item.icon ?: context.getDrawable(R.drawable.sym_def_app_icon)!!,
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(item.icon)
+                .size(50, 50) // Downsample to 100x100 px
+                .scale(Scale.FILL) // or Scale.FIT
+                .crossfade(true)
+                .build(),
+            contentDescription = null,
             modifier = Modifier
                 .size(50.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color.Gray)
+                .background(Color.Transparent)
         )
 
         Spacer(modifier = Modifier.width(5.dp))
@@ -151,19 +127,4 @@ fun AppItemView(
             }
         }
     }
-}
-
-@Composable
-fun DrawableImage(drawable: Drawable, modifier: Modifier = Modifier) {
-    val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: 1
-    val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: 1
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(bitmap)
-    drawable.setBounds(0, 0, canvas.width, canvas.height)
-    drawable.draw(canvas)
-    Image(
-        painter = BitmapPainter(bitmap.asImageBitmap()),
-        contentDescription = null,
-        modifier = modifier
-    )
 }

@@ -4,6 +4,8 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import com.interview.appscheduler.application.SchedulerApplication
 import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import androidx.core.graphics.createBitmap
 
 class AppSchedulerRepository @Inject constructor(
     private val localDataSource: AbstractAppSchedulerLocalDataSource
@@ -42,6 +45,8 @@ class AppSchedulerRepository @Inject constructor(
             for (applicationInfo in packages) {
                 val appName = packageManager.getApplicationLabel(applicationInfo).toString()
                 val packageInfo = packageManager.getPackageInfo(applicationInfo.packageName, 0)
+
+
 
                 val appEntity = AppEntity(
                     name = appName,

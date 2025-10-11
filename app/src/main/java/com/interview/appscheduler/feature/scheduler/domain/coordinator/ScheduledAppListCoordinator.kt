@@ -16,10 +16,14 @@ class ScheduledAppListCoordinator: Coordinator {
     }
 
     fun navigateToInstalledAppListView() {
-        navController.navigate(NavigationItem.InstalledAppList.route) //"details/$id"
+        navController.navigate(NavigationItem.InstalledAppList.route)
     }
 
     fun  navigateToScreen(navController: NavController, screen: String) {
         navController.navigate(screen)
+    }
+
+    fun back() {
+        navController.popBackStack()
     }
 }
