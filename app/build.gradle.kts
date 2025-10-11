@@ -80,6 +80,7 @@ dependencies {
     implementation("com.google.maps.android:maps-compose:4.0.0")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     // Test dependencies (duplicates removed, only one instance kept)
     testImplementation(libs.junit)

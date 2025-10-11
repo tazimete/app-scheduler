@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -113,22 +114,22 @@ fun AppItemView(
 
             // Edit Button
             if(showEditButton) {
-                OutlinedButton(
-                    onClick = onClickEdit,
-                    shape = CircleShape,
-                    border = BorderStroke(1.dp, Color(0xFF00966E)),
-                    contentPadding = PaddingValues(0.dp),
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Text(
-                        "-",
-                        color = Color(0xFF00966E),
-                        fontSize = 21.sp,
-                        fontWeight = FontWeight.Normal
+                IconButton(onClick = onClickDelete) {
+                    Icon(
+                        modifier = Modifier
+                            .width(28.dp)
+                            .height(28.dp)
+                            .background(Color.Transparent)
+                            .border(
+                                width = 0.6.dp,
+                                color = Color(0xFF00966E),
+                                shape = RoundedCornerShape(4.dp)
+                            ),
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Delete",
+                        tint = Color(0xFF00966E)
                     )
                 }
-
-                Spacer(modifier = Modifier.width(4.dp))
             }
 
             // Delete Button
@@ -136,8 +137,8 @@ fun AppItemView(
                 IconButton(onClick = onClickDelete) {
                     Icon(
                         modifier = Modifier
-                            .width(30.dp)
-                            .height(30.dp)
+                            .width(28.dp)
+                            .height(28.dp)
                             .background(Color.Transparent)
                             .border(
                                 width = 0.6.dp,
