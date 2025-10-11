@@ -40,8 +40,10 @@ import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 fun AppItemView(
     item: AppEntity,
     showAddButton: Boolean = false,
+    showEditButton: Boolean = false,
     showDeleteButton: Boolean = false,
     onClickAdd: () -> Unit = {},
+    onClickEdit: () -> Unit = {},
     onClickDelete: () -> Unit = {}
 ) {
     Column(
@@ -94,13 +96,33 @@ fun AppItemView(
                 OutlinedButton(
                     onClick = onClickAdd,
                     shape = CircleShape,
-                    border = BorderStroke(1.dp, Color.LightGray),
+                    border = BorderStroke(1.dp, Color(0xFF00966E)),
                     contentPadding = PaddingValues(0.dp),
                     modifier = Modifier.size(36.dp)
                 ) {
                     Text(
                         "+",
-                        color = Color.Black,
+                        color = Color(0xFF00966E),
+                        fontSize = 21.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+
+            // Edit Button
+            if(showEditButton) {
+                OutlinedButton(
+                    onClick = onClickEdit,
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, Color(0xFF00966E)),
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Text(
+                        "-",
+                        color = Color(0xFF00966E),
                         fontSize = 21.sp,
                         fontWeight = FontWeight.Normal
                     )

@@ -79,6 +79,7 @@ fun InstalledAppListView(
             DatePickerBottomSheet(
                 onSelectDateTime = { date->
                     viewModel.createScheduledApp(viewModel.selectedApp!!, date)
+                    showBottomSheet.value = false
                 }
             )
         }

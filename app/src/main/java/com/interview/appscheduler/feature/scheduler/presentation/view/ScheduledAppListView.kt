@@ -1,6 +1,5 @@
 package com.interview.appscheduler.feature.scheduler.presentation.view
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -11,24 +10,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +57,18 @@ fun ScheduledAppListView(
                     IconButton(onClick = {  }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            coordinator.navigateToInstalledAppListView()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add, // Replace with your desired icon
+                            contentDescription = "Add Schedule"
+                        )
+                    }
                 }
             )
         }
@@ -80,9 +87,9 @@ fun ScheduledAppListView(
                 for(app in appListUiState.data) {
                     AppItemView(
                         item = app,
-                        showAddButton = true,
+                        showEditButton = true,
                         showDeleteButton = true,
-                        onClickAdd = {
+                        onClickEdit = {
                             // Handle add button click
                         },
                         onClickDelete = {
@@ -94,15 +101,15 @@ fun ScheduledAppListView(
                 // show no data view
                 if(appListUiState.data.isEmpty()) {
                     NoDataView(details = "There is no scheduled app available. Please add a schedule.")
-
-                    Spacer(Modifier.height(20.dp))
-
-                    AddScheduleButton(
-                        onClick = {
-                            coordinator.navigateToInstalledAppListView()
-                        }
-                    )
                 }
+
+                Spacer(Modifier.height(20.dp))
+
+                AddScheduleButton(
+                    onClick = {
+                        coordinator.navigateToInstalledAppListView()
+                    }
+                )
 
                 Spacer(Modifier.height(100.dp))
             }
@@ -133,3 +140,4 @@ fun AddScheduleButton(
         )
     }
 }
+
