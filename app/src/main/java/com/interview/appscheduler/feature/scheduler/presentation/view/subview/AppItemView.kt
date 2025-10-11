@@ -1,7 +1,6 @@
 package com.interview.appscheduler.feature.scheduler.presentation.view.subview
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -27,8 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,85 +44,98 @@ fun AppItemView(
     onClickAdd: () -> Unit = {},
     onClickDelete: () -> Unit = {}
 ) {
-    val context = LocalContext.current
-
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(item.icon)
-                .size(50, 50) // Downsample to 100x100 px
-                .scale(Scale.FILL) // or Scale.FIT
-                .crossfade(true)
-                .build(),
-            contentDescription = null,
+            .padding(vertical = 6.dp, horizontal = 8.dp),
+    ){
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
             modifier = Modifier
-                .size(50.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.Transparent)
-        )
-
-        Spacer(modifier = Modifier.width(5.dp))
-
-        Column(
-            modifier = Modifier.weight(1f)
+                .fillMaxWidth()
+                .padding(0.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = item.name.toString(),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.Black
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(item.icon)
+                    .size(50, 50) // Downsample to 100x100 px
+                    .scale(Scale.FILL) // or Scale.FIT
+                    .crossfade(true)
+                    .build(),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.Transparent)
             )
-            Text(
-                text = "Scheduled: ${item.scheduledTime}",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-        }
 
-        // Add Button
-        if(showAddButton) {
-            OutlinedButton(
-                onClick = onClickAdd,
-                shape = CircleShape,
-                border = BorderStroke(1.dp, Color.LightGray),
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier.size(36.dp)
+            Spacer(modifier = Modifier.width(7.5.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    "+",
-                    color = Color.Black,
-                    fontSize = 21.sp,
-                    fontWeight = FontWeight.Normal
+                    text = item.name.toString(),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black
+                )
+                Text(
+                    text = "Scheduled: ${item.scheduledTime}",
+                    fontSize = 14.sp,
+                    color = Color.Gray
                 )
             }
 
-            Spacer(modifier = Modifier.width(4.dp))
-        }
+            // Add Button
+            if(showAddButton) {
+                OutlinedButton(
+                    onClick = onClickAdd,
+                    shape = CircleShape,
+                    border = BorderStroke(1.dp, Color.LightGray),
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Text(
+                        "+",
+                        color = Color.Black,
+                        fontSize = 21.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
 
-        // Delete Button
-        if(showDeleteButton) {
-            IconButton(onClick = onClickDelete) {
-                Icon(
-                    modifier = Modifier
-                        .width(30.dp)
-                        .height(30.dp)
-                        .background(Color.Transparent)
-                        .border(
-                            width = 0.6.dp,
-                            color = Color.Red.copy(alpha = 0.8f),
-                            shape = RoundedCornerShape(4.dp)
-                        ),
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = Color.Red
-                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+
+            // Delete Button
+            if(showDeleteButton) {
+                IconButton(onClick = onClickDelete) {
+                    Icon(
+                        modifier = Modifier
+                            .width(30.dp)
+                            .height(30.dp)
+                            .background(Color.Transparent)
+                            .border(
+                                width = 0.6.dp,
+                                color = Color.Red.copy(alpha = 0.8f),
+                                shape = RoundedCornerShape(4.dp)
+                            ),
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.Red
+                    )
+                }
             }
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Divider(
+            modifier = Modifier
+                .height(0.6.dp),
+            color = Color.Gray.copy(alpha = 0.2f)
+        )
     }
 }
