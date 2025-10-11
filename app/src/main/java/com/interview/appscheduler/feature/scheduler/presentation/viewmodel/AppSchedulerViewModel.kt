@@ -6,7 +6,8 @@ import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
 import com.interview.appscheduler.core.worker.DispatcherProvider
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
-import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllAppListUseCase
+import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllScheduledAppListUseCase
+import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllInstalledAppListUseCase
 import com.interview.appscheduler.feature.scheduler.presentation.state.AppListUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,21 +18,26 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AppSchedulerViewModel @Inject constructor(
-    private val getAllAppListUseCase: GetAllAppListUseCase,
+    private val getAllInstalledAppListUseCase: GetAllInstalledAppListUseCase,
+    private val getAllScheduledAppListUseCase: GetAllScheduledAppListUseCase,
     private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
     private val _appListUIState = MutableStateFlow(AppListUIState(isLoading = true))
     val appListUIState = _appListUIState.asStateFlow()
 
+    private val _installedAppListUIState = MutableStateFlow(AppListUIState(isLoading = true))
+    val installedAppListUIState = _installedAppListUIState.asStateFlow()
+
     init {
-        getAllAppList()
+        getAllScheduledAppList()
+        getAllInstalledApps()
     }
 
-    fun getAllAppList() {
+    fun getAllScheduledAppList() {
         _appListUIState.value = _appListUIState.value.copy(isLoading = true, message = null)
 
         viewModelScope.launch(dispatcherProvider.main) {
-            getAllAppListUseCase.invoke()
+            getAllScheduledAppListUseCase.invoke()
                 .flowOn(dispatcherProvider.io)
                 .collect { result ->
                     result.fold(
@@ -39,6 +45,40 @@ class AppSchedulerViewModel @Inject constructor(
                         { error -> onFailedResponse(error) }
                     )
                 }
+        }
+    }
+
+    fun getAllInstalledApps() {
+        _installedAppListUIState.value = _installedAppListUIState.value.copy(isLoading = true, message = null)
+
+        viewModelScope.launch(dispatcherProvider.main) {
+            getAllInstalledAppListUseCase.invoke()
+                .flowOn(dispatcherProvider.io)
+                .collect { result ->
+                    result.fold(
+                        { entity -> onSuccessGetAllInstalledAppListResponse(entity) },
+                        { error -> onFailedResponse(error) }
+                    )
+                }
+        }
+    }
+    private fun onSuccessGetAllInstalledAppListResponse(response: Entity<List<AppEntity>>) {
+        // You can update the UI state with the received data
+        response.data?.let {
+
+            _installedAppListUIState.value = _installedAppListUIState.value.copy(
+                isLoading = false,
+                message = null,
+                code = 200,
+                data = it
+            )
+        } ?: run {
+            onFailedResponse(
+                ErrorEntity.ServerError(
+                    errorCode = 404,
+                    errorMessage = "No data found"
+                )
+            )
         }
     }
 

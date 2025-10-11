@@ -5,5 +5,5 @@ import com.interview.appscheduler.feature.scheduler.data.entity.AppSchedulerTabl
 import kotlinx.coroutines.flow.Flow
 
 interface AbstractAppSchedulerLocalDataSource {
-    suspend fun getAllAppList(): Flow<Result<Response<List<AppSchedulerTableEntity>>>>
+    suspend fun getScheduledAppList(): Flow<Result<Response<List<AppSchedulerTableEntity>>>>
 }

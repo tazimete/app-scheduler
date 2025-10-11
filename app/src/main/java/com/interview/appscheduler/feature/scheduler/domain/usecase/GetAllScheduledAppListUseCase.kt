@@ -7,10 +7,10 @@ import com.interview.appscheduler.feature.scheduler.domain.repository.AbstractAp
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetAllAppListUseCase @Inject constructor(
+class GetAllScheduledAppListUseCase @Inject constructor(
     private val repository: AbstractAppSchedulerRepository
 ) : AbstractUseCase<Flow<Result<Entity<List<AppEntity>>>>, Unit> {
-    override suspend fun invoke():  Flow<Result<Entity<List<AppEntity>>>> =  repository.getAppList()
+    override suspend fun invoke():  Flow<Result<Entity<List<AppEntity>>>> =  repository.getScheduledAppList()
 
     override suspend fun invoke(params: Unit):  Flow<Result<Entity<List<AppEntity>>>>  = TODO("Not yet implemented")
 }

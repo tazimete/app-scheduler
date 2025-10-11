@@ -1,6 +1,11 @@
 package com.interview.appscheduler.feature.scheduler.presentation.view.subview
 
+import android.R
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +36,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,9 +76,17 @@ fun AppItemView(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        AsyncImage(
-            model = imageRequest,
-            contentDescription = "POSM Product Image",
+//        AsyncImage(
+//            model = imageRequest,
+//            contentDescription = "POSM Product Image",
+//            modifier = Modifier
+//                .size(50.dp)
+//                .clip(RoundedCornerShape(8.dp))
+//                .background(Color.Gray)
+//        )
+
+        DrawableImage(
+            drawable = item.icon ?: context.getDrawable(R.drawable.sym_def_app_icon)!!,
             modifier = Modifier
                 .size(50.dp)
                 .clip(RoundedCornerShape(8.dp))
@@ -135,4 +151,19 @@ fun AppItemView(
             }
         }
     }
+}
+
+@Composable
+fun DrawableImage(drawable: Drawable, modifier: Modifier = Modifier) {
+    val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: 1
+    val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: 1
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    drawable.setBounds(0, 0, canvas.width, canvas.height)
+    drawable.draw(canvas)
+    Image(
+        painter = BitmapPainter(bitmap.asImageBitmap()),
+        contentDescription = null,
+        modifier = modifier
+    )
 }

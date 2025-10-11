@@ -12,7 +12,7 @@ import javax.inject.Inject
 class AppSchedulerLocalDataSource @Inject constructor(
     private val appSchedulerDao: AppSchedulerDao,
 ) : AbstractAppSchedulerLocalDataSource {
-    override suspend fun getAllAppList(): Flow<Result<Response<List<AppSchedulerTableEntity>>>> = flow {
+    override suspend fun getScheduledAppList(): Flow<Result<Response<List<AppSchedulerTableEntity>>>> = flow {
         val data: List<AppSchedulerTableEntity> = appSchedulerDao.getAll()
         if (data.isNotEmpty()) {
             emit(Result.success(Response(isSuccess = true, message = "Get all app scheduler successfully", data = data)))

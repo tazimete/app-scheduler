@@ -1,5 +1,6 @@
 package com.interview.appscheduler.feature.scheduler.domain.entity
 
+import android.graphics.drawable.Drawable
 import com.google.gson.annotations.SerializedName
 
 data class AppEntity(
@@ -13,6 +14,10 @@ data class AppEntity(
     val name: String? = null,
     @SerializedName("packageName")
     val packageName: String? = null,
+    val icon: Drawable? = null,
+    val versionCode: Long? = null,
+    val versionName: String? = null,
+    val isSystemApp: Boolean? = null,
     @SerializedName("thumbnail")
     val thumbnail: String? = null,
     @SerializedName("isScheduled")
