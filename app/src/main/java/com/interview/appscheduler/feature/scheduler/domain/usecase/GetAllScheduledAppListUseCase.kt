@@ -7,15 +7,10 @@ import com.interview.appscheduler.feature.scheduler.domain.repository.AbstractAp
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-typealias BaseGetAllAppListUseCase = AbstractUseCase<GetAllAppListReturnType, GetAllAppListParamType>
-typealias GetAllAppListReturnType = Flow<Result<Entity<List<AppEntity>>>>
-typealias GetAllAppListParamType = Unit
-
 class GetAllAppListUseCase @Inject constructor(
     private val repository: AbstractAppSchedulerRepository
-//) : AbstractUseCase<GetAllAppListReturnType, GetAllAppListParamType> {
-) : BaseGetAllAppListUseCase {
-    override suspend fun invoke(): GetAllAppListReturnType =  repository.getAppList()
+) : AbstractUseCase<Flow<Result<Entity<List<AppEntity>>>>, Unit> {
+    override suspend fun invoke():  Flow<Result<Entity<List<AppEntity>>>> =  repository.getAppList()
 
-    override suspend fun invoke(params: Unit): GetAllAppListReturnType  = TODO("Not yet implemented")
+    override suspend fun invoke(params: Unit):  Flow<Result<Entity<List<AppEntity>>>>  = TODO("Not yet implemented")
 }
