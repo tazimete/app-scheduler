@@ -8,8 +8,6 @@ data class AppEntity(
     val id: Int? = null,
     @SerializedName("appId")
     val appId: Int? = null,
-    @SerializedName("code")
-    val code: String? = null,
     @SerializedName("name")
     val name: String? = null,
     @SerializedName("packageName")
