@@ -1,4 +1,4 @@
-package com.interview.appscheduler
+package com.interview.appscheduler.application
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,7 +10,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.interview.appscheduler.feature.scheduler.presentation.view.AppSchedulerView
+import androidx.navigation.compose.rememberNavController
+import com.interview.appscheduler.feature.home.presentation.view.HomeView
+import com.interview.appscheduler.feature.scheduler.presentation.view.ScheduledAppListView
 import com.interview.appscheduler.ui.theme.AppSchedulerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,19 +24,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppSchedulerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppSchedulerView(
+                    HomeView(
+                        navController = rememberNavController(),
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AppSchedulerTheme {
-        AppSchedulerView()
     }
 }

@@ -1,4 +1,4 @@
-package com.interview.appscheduler
+package com.interview.appscheduler.application
 
 import android.app.Application
 import android.content.Context
@@ -6,12 +6,12 @@ import dagger.hilt.android.HiltAndroidApp
 
 
 @HiltAndroidApp
-class SchedulerApp : Application(){
+class SchedulerApplication : Application(){
     init {
         instance = this
     }
     companion object {
-        private var instance: SchedulerApp? = null
+        private var instance: SchedulerApplication? = null
         fun getApplicationContext(): Context {
             return instance!!.applicationContext
         }
