@@ -14,6 +14,4 @@ abstract class AppSchedulerDao(roomDatabase: RoomDatabase) : BaseDao<AppSchedule
 
     @Query("select * from ${RoomDBEntities.app_scheduler_table}")
     abstract fun getAll(): List<AppSchedulerTableEntity>
-
-
 }

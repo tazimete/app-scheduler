@@ -21,23 +21,23 @@ abstract class BaseDao<T : BaseEntity>(
     abstract fun insertWithReplace(entities: List<T>): LongArray
 
     @Update
-    abstract fun update(entity: T)
+    abstract fun update(entity: T): Int
 
     @Update
-    abstract fun update(entities: List<T>)
+    abstract fun update(entities: List<T>): Int
 
     @Delete
-    abstract fun delete(entity: T)
+    abstract fun delete(entity: T): Int
 
     @Delete
-    abstract fun delete(entities: List<T>)
+    abstract fun delete(entities: List<T>): Int
 
     @RawQuery
     protected abstract fun deleteAll(query: SupportSQLiteQuery): Int
 
-    fun deleteAll() {
+    fun deleteAll(): Int {
         val query = SimpleSQLiteQuery("DELETE FROM $tableName")
-        deleteAll(query)
+        return deleteAll(query)
     }
 
 

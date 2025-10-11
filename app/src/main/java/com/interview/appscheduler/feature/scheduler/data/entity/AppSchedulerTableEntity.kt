@@ -36,3 +36,19 @@ fun AppSchedulerTableEntity.toDomainEntity(): AppEntity {
         status = status
     )
 }
+
+fun AppEntity.toDataEntity(): AppSchedulerTableEntity {
+    return AppSchedulerTableEntity(
+        id = id ?: 0,
+        appId = appId,
+        name = name,
+        packageName = packageName,
+        versionCode = versionCode ?: 0,
+        versionName = versionName ?: "",
+        thumbnail = thumbnail,
+        isScheduled = isScheduled,
+        scheduledTime = scheduledTime ?: "",
+        installedTime = installedTime ?: "",
+        status = status
+    )
+}

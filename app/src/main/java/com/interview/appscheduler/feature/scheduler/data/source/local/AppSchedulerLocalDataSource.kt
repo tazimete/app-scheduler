@@ -12,6 +12,42 @@ import javax.inject.Inject
 class AppSchedulerLocalDataSource @Inject constructor(
     private val appSchedulerDao: AppSchedulerDao,
 ) : AbstractAppSchedulerLocalDataSource {
+    override suspend fun createAppSchedule(item: AppSchedulerTableEntity): Flow<Result<Response<Long>>> = flow {
+        val data = appSchedulerDao.insert(item)
+        if ( data > 0) {
+            emit(Result.success(Response(isSuccess = true, message = "Created app schedule successfully", data = data)))
+        } else {
+            emit(Result.failure(ErrorEntity.NotFound(404, "Failed to create app schedule")))
+        }
+    }.catch { e ->
+        val errorEntity = ErrorEntity.DatabaseAccessingError(404, "Failed to create app schedule")
+        emit(Result.failure(errorEntity))
+    }
+
+    override suspend fun updateAppSchedule(item: AppSchedulerTableEntity): Flow<Result<Response<Int>>> = flow {
+        val data = appSchedulerDao.update(item)
+        if ( data > 0) {
+            emit(Result.success(Response(isSuccess = true, message = "Updated app schedule successfully", data = data)))
+        } else {
+            emit(Result.failure(ErrorEntity.NotFound(404, "Failed to update app schedule")))
+        }
+    }.catch { e ->
+        val errorEntity = ErrorEntity.DatabaseAccessingError(404, "Failed to update app schedule")
+        emit(Result.failure(errorEntity))
+    }
+
+    override suspend fun deleteAppSchedule(item: AppSchedulerTableEntity): Flow<Result<Response<Int>>> = flow {
+        val data = appSchedulerDao.delete(item)
+        if ( data > 0) {
+            emit(Result.success(Response(isSuccess = true, message = "Deleted app schedule successfully", data = data)))
+        } else {
+            emit(Result.failure(ErrorEntity.NotFound(404, "Failed to delete app schedule")))
+        }
+    }.catch { e ->
+        val errorEntity = ErrorEntity.DatabaseAccessingError(404, "Failed to delete app schedule")
+        emit(Result.failure(errorEntity))
+    }
+
     override suspend fun getScheduledAppList(): Flow<Result<Response<List<AppSchedulerTableEntity>>>> = flow {
         val data: List<AppSchedulerTableEntity> = appSchedulerDao.getAll()
         if (data.isNotEmpty()) {

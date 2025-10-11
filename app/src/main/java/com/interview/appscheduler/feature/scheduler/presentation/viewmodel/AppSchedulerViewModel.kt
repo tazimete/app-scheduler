@@ -28,7 +28,7 @@ class AppSchedulerViewModel @Inject constructor(
 
     private val _installedAppListUIState = MutableStateFlow(AppListUIState(isLoading = true))
     val installedAppListUIState = _installedAppListUIState.asStateFlow()
-    
+
     var selectedApp: AppEntity? = null
 
     fun getAllScheduledAppList() {

@@ -1,14 +1,10 @@
 package com.interview.appscheduler.feature.scheduler.data.repository
 
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import com.interview.appscheduler.application.SchedulerApplication
 import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
+import com.interview.appscheduler.feature.scheduler.data.entity.toDataEntity
 import com.interview.appscheduler.feature.scheduler.data.entity.toDomainEntity
 import com.interview.appscheduler.feature.scheduler.data.source.local.AbstractAppSchedulerLocalDataSource
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
@@ -18,11 +14,49 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-import androidx.core.graphics.createBitmap
 
 class AppSchedulerRepository @Inject constructor(
     private val localDataSource: AbstractAppSchedulerLocalDataSource
 ) : AbstractAppSchedulerRepository {
+    override suspend fun createAppSchedule(item: AppEntity): Flow<Result<Entity<Long>>> {
+        return localDataSource.createAppSchedule(item.toDataEntity())
+            .map { result ->
+                result.map { data ->
+                    Entity<Long>(
+                        isSuccess = data.isSuccess,
+                        message = data.message,
+                        data = data.data,
+                    )
+                }
+            }
+    }
+
+    override suspend fun updateAppSchedule(item: AppEntity): Flow<Result<Entity<Int>>> {
+        return localDataSource.updateAppSchedule(item.toDataEntity())
+            .map { result ->
+                result.map { data ->
+                    Entity<Int>(
+                        isSuccess = data.isSuccess,
+                        message = data.message,
+                        data = data.data,
+                    )
+                }
+            }
+    }
+
+    override suspend fun deleteAppSchedule(item: AppEntity): Flow<Result<Entity<Int>>> {
+        return localDataSource.deleteAppSchedule(item.toDataEntity())
+            .map { result ->
+                result.map { data ->
+                    Entity<Int>(
+                        isSuccess = data.isSuccess,
+                        message = data.message,
+                        data = data.data,
+                    )
+                }
+            }
+    }
+
     override suspend fun getScheduledAppList(): Flow<Result<Entity<List<AppEntity>>>> {
         return localDataSource.getScheduledAppList()
             .map { result ->
