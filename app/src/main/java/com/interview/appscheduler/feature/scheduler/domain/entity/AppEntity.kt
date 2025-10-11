@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 
 data class AppEntity(
     @SerializedName("id")
-    val id: Int? = null,
+    var id: Long? = null,
     @SerializedName("appId")
     val appId: Int? = null,
     @SerializedName("name")
@@ -21,7 +21,7 @@ data class AppEntity(
     @SerializedName("isScheduled")
     val isScheduled: Boolean,
     @SerializedName("scheduledTime")
-    val scheduledTime: String? = null,
+    var scheduledTime: String? = null,
     @SerializedName("installedTime")
     val installedTime: String? = null,
     @SerializedName("status")

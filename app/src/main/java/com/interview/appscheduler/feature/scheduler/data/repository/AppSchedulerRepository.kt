@@ -58,13 +58,16 @@ class AppSchedulerRepository @Inject constructor(
     }
 
     override suspend fun getScheduledAppList(): Flow<Result<Entity<List<AppEntity>>>> {
+        val packageManager = SchedulerApplication.getApplicationContext().packageManager
         return localDataSource.getScheduledAppList()
             .map { result ->
                 result.map { data ->
                     Entity<List<AppEntity>>(
                         isSuccess = data.isSuccess,
                         message = data.message,
-                        data = data.data?.map { it.toDomainEntity() } ?: emptyList(),
+                        data = data.data?.map {
+                            it.toDomainEntity().copy(icon = packageManager.getApplicationIcon(it.packageName))
+                        } ?: emptyList(),
                     )
                 }
             }

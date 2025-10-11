@@ -6,9 +6,13 @@ import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
 import com.interview.appscheduler.core.worker.DispatcherProvider
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
+import com.interview.appscheduler.feature.scheduler.domain.usecase.CreateAppScheduleUseCase
+import com.interview.appscheduler.feature.scheduler.domain.usecase.DeleteAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllScheduledAppListUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllInstalledAppListUseCase
+import com.interview.appscheduler.feature.scheduler.domain.usecase.UpdateAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.presentation.state.AppListUIState
+import com.interview.appscheduler.library.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +25,9 @@ import javax.inject.Inject
 class AppSchedulerViewModel @Inject constructor(
     private val getAllInstalledAppListUseCase: GetAllInstalledAppListUseCase,
     private val getAllScheduledAppListUseCase: GetAllScheduledAppListUseCase,
+    private val createAppScheduleUseCase: CreateAppScheduleUseCase,
+    private val updateAppScheduleUseCase: UpdateAppScheduleUseCase,
+    private val deleteAppScheduleUseCase: DeleteAppScheduleUseCase,
     private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
     private val _appListUIState = MutableStateFlow(AppListUIState(isLoading = true))
@@ -39,7 +46,7 @@ class AppSchedulerViewModel @Inject constructor(
                 .flowOn(dispatcherProvider.io)
                 .collect { result ->
                     result.fold(
-                        { entity -> onSuccessResponse(entity) },
+                        { entity -> onSuccessGetAllScheduledAppListResponse(entity) },
                         { error -> onFailedResponse(error) }
                     )
                 }
@@ -62,8 +69,20 @@ class AppSchedulerViewModel @Inject constructor(
     }
 
     fun createScheduledApp(appEntity: AppEntity, selectedDate: Date) {
-        print(appEntity)
-        print(selectedDate)
+        appEntity.scheduledTime = DateUtils.formatCalendarToDateString(selectedDate)
+
+        _installedAppListUIState.value = _installedAppListUIState.value.copy(isLoading = true, message = null)
+
+        viewModelScope.launch(dispatcherProvider.main) {
+            createAppScheduleUseCase.invoke(appEntity)
+                .flowOn(dispatcherProvider.io)
+                .collect { result ->
+                    result.fold(
+                        { entity -> onSuccessCreateAppScheduleListResponse(entity) },
+                        { error -> onFailedResponse(error) }
+                    )
+                }
+        }
     }
 
     // Handle success and failure responses
@@ -85,7 +104,7 @@ class AppSchedulerViewModel @Inject constructor(
         }
     }
 
-    private fun onSuccessResponse(response: Entity<List<AppEntity>>) {
+    private fun onSuccessGetAllScheduledAppListResponse(response: Entity<List<AppEntity>>) {
         response.data?.let {
 
             _appListUIState.value = _appListUIState.value.copy(
@@ -93,6 +112,29 @@ class AppSchedulerViewModel @Inject constructor(
                 message = null,
                 code = 200,
                 data = it
+            )
+        } ?: run {
+            onFailedResponse(
+                ErrorEntity.ServerError(
+                    errorCode = 404,
+                    errorMessage = "No data found"
+                )
+            )
+        }
+    }
+
+    // Handle success and failure responses
+    private fun onSuccessCreateAppScheduleListResponse(response: Entity<Long>) {
+        selectedApp?.id = response.data
+        var data = _installedAppListUIState.value.data.toMutableList()
+        data.add(selectedApp!!)
+
+        response.data?.let {
+            _installedAppListUIState.value = _installedAppListUIState.value.copy(
+                isLoading = false,
+                message = null,
+                code = 200,
+                data = data
             )
         } ?: run {
             onFailedResponse(

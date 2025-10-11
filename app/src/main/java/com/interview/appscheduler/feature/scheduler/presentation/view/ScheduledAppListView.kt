@@ -50,30 +50,14 @@ fun ScheduledAppListView(
     val scrollState = rememberScrollState()
     val appListUiState by viewModel.appListUIState.collectAsState()
 
-    // Bottom sheet state
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val showBottomSheet = remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         viewModel.getAllScheduledAppList()
-    }
-
-    if (showBottomSheet.value) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet.value = false },
-            sheetState = bottomSheetState
-        ) {
-            Box(
-                modifier = Modifier
-            ) {
-            }
-        }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scheduled Apps") },
+                title = { Text("Scheduled Apps (${appListUiState.data.count()})") },
                 navigationIcon = {
                     IconButton(onClick = {  }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -94,14 +78,6 @@ fun ScheduledAppListView(
                     .fillMaxWidth()
             ) {
                 for(app in appListUiState.data) {
-                    Divider(
-                        modifier = Modifier
-                            .height(6.dp),
-                        color = Color.Gray.copy(alpha = 0.2f)
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     AppItemView(
                         item = app,
                         showAddButton = true,
@@ -112,14 +88,6 @@ fun ScheduledAppListView(
                         onClickDelete = {
                             // Handle delete button click
                         }
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Divider(
-                        thickness = 0.75.dp,
-                        color = Color.Gray.copy(alpha = 0.3f),
-                        modifier = Modifier.padding(vertical = 0.dp, horizontal = 8.dp)
                     )
                 }
 

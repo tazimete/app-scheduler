@@ -8,7 +8,7 @@ import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 @Entity(tableName = "app_scheduler_table")
 data class AppSchedulerTableEntity(
     @PrimaryKey(autoGenerate = true)
-    override val id: Int,
+    override val id: Long,
     val appId: Int? = null,
     val name: String,
     val packageName: String,
