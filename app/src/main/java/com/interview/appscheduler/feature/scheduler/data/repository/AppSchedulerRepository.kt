@@ -40,13 +40,14 @@ class AppSchedulerRepository @Inject constructor(
             val packageManager = SchedulerApplication.getApplicationContext().packageManager
             val appEntities = mutableListOf<AppEntity>()
 
-            val packages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+             val flags = PackageManager.GET_META_DATA or
+                PackageManager.GET_PERMISSIONS or
+                PackageManager.GET_ACTIVITIES
+            val packages = packageManager.getInstalledApplications(flags)
 
             for (applicationInfo in packages) {
                 val appName = packageManager.getApplicationLabel(applicationInfo).toString()
                 val packageInfo = packageManager.getPackageInfo(applicationInfo.packageName, 0)
-
-
 
                 val appEntity = AppEntity(
                     name = appName,
@@ -54,7 +55,8 @@ class AppSchedulerRepository @Inject constructor(
                     icon = packageManager.getApplicationIcon(applicationInfo.packageName),
                     versionName = packageInfo.versionName,
                     versionCode = packageInfo.longVersionCode,
-                    isSystemApp = applicationInfo.flags != 0
+                    isSystemApp = applicationInfo.flags != 0,
+                    isScheduled = false
                 )
 
                 appEntities.add(appEntity)

@@ -10,16 +10,16 @@ data class AppSchedulerTableEntity(
     @PrimaryKey(autoGenerate = true)
     override val id: Int,
     val appId: Int? = null,
-    val name: String?,
+    val name: String,
     val packageName: String,
     val versionCode: Long,
     val versionName: String,
     val thumbnail: String? = null,
-    val isScheduled: Boolean?,
-    val scheduledTime: String? = null,
-    val installedTime: String? = null
+    val isScheduled: Boolean,
+    val scheduledTime: String,
+    val installedTime: String,
+    val status: Int? = null
 ) : BaseEntity()
-
 
 fun AppSchedulerTableEntity.toDomainEntity(): AppEntity {
     return AppEntity(
@@ -32,6 +32,7 @@ fun AppSchedulerTableEntity.toDomainEntity(): AppEntity {
         thumbnail = thumbnail,
         isScheduled = isScheduled,
         scheduledTime = scheduledTime,
-        installedTime = installedTime
+        installedTime = installedTime,
+        status = status
     )
 }

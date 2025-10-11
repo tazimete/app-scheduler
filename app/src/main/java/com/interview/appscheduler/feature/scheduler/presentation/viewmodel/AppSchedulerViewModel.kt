@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,11 +28,8 @@ class AppSchedulerViewModel @Inject constructor(
 
     private val _installedAppListUIState = MutableStateFlow(AppListUIState(isLoading = true))
     val installedAppListUIState = _installedAppListUIState.asStateFlow()
-
-    init {
-        getAllScheduledAppList()
-        getAllInstalledApps()
-    }
+    
+    var selectedApp: AppEntity? = null
 
     fun getAllScheduledAppList() {
         _appListUIState.value = _appListUIState.value.copy(isLoading = true, message = null)
@@ -62,10 +60,15 @@ class AppSchedulerViewModel @Inject constructor(
                 }
         }
     }
-    private fun onSuccessGetAllInstalledAppListResponse(response: Entity<List<AppEntity>>) {
-        // You can update the UI state with the received data
-        response.data?.let {
 
+    fun createScheduledApp(appEntity: AppEntity, selectedDate: Date) {
+        print(appEntity)
+        print(selectedDate)
+    }
+
+    // Handle success and failure responses
+    private fun onSuccessGetAllInstalledAppListResponse(response: Entity<List<AppEntity>>) {
+        response.data?.let {
             _installedAppListUIState.value = _installedAppListUIState.value.copy(
                 isLoading = false,
                 message = null,
@@ -83,7 +86,6 @@ class AppSchedulerViewModel @Inject constructor(
     }
 
     private fun onSuccessResponse(response: Entity<List<AppEntity>>) {
-        // You can update the UI state with the received data
         response.data?.let {
 
             _appListUIState.value = _appListUIState.value.copy(

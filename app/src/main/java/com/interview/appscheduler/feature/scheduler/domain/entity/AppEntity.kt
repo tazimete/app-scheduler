@@ -9,9 +9,9 @@ data class AppEntity(
     @SerializedName("appId")
     val appId: Int? = null,
     @SerializedName("name")
-    val name: String? = null,
+    val name: String,
     @SerializedName("packageName")
-    val packageName: String? = null,
+    val packageName: String,
     val icon: Drawable? = null,
     val versionCode: Long? = null,
     val versionName: String? = null,
@@ -19,9 +19,11 @@ data class AppEntity(
     @SerializedName("thumbnail")
     val thumbnail: String? = null,
     @SerializedName("isScheduled")
-    val isScheduled: Boolean? = false,
+    val isScheduled: Boolean,
     @SerializedName("scheduledTime")
     val scheduledTime: String? = null,
     @SerializedName("installedTime")
-    val installedTime: String? = null
+    val installedTime: String? = null,
+    @SerializedName("status")
+    val status: Int? = null
 )
