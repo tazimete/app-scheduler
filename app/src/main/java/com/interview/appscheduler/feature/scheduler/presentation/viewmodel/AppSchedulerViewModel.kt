@@ -2,6 +2,7 @@ package com.interview.appscheduler.feature.scheduler.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.interview.appscheduler.application.SchedulerApplication
 import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
 import com.interview.appscheduler.core.worker.DispatcherProvider
@@ -11,6 +12,7 @@ import com.interview.appscheduler.feature.scheduler.domain.usecase.DeleteAppSche
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllScheduledAppListUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllInstalledAppListUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.UpdateAppScheduleUseCase
+import com.interview.appscheduler.feature.scheduler.domain.worker.TaskScheduler
 import com.interview.appscheduler.feature.scheduler.presentation.state.AppListUIState
 import com.interview.appscheduler.library.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +30,7 @@ class AppSchedulerViewModel @Inject constructor(
     private val createAppScheduleUseCase: CreateAppScheduleUseCase,
     private val updateAppScheduleUseCase: UpdateAppScheduleUseCase,
     private val deleteAppScheduleUseCase: DeleteAppScheduleUseCase,
+    private val taskScheduler: TaskScheduler,
     private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
     private val _appListUIState = MutableStateFlow(AppListUIState(isLoading = true))
@@ -69,7 +72,7 @@ class AppSchedulerViewModel @Inject constructor(
     }
 
     fun createScheduledApp(appEntity: AppEntity, selectedDate: Date) {
-        appEntity.scheduledTime = DateUtils.formatCalendarToDateString(selectedDate)
+        appEntity.scheduledTime = DateUtils.getCalendarDateToString(selectedDate)
 
         _installedAppListUIState.value = _installedAppListUIState.value.copy(isLoading = true, message = null)
 
@@ -126,6 +129,10 @@ class AppSchedulerViewModel @Inject constructor(
     // Handle success and failure responses
     private fun onSuccessCreateAppScheduleListResponse(response: Entity<Long>) {
         selectedApp?.id = response.data
+
+        // Schedule the app
+        taskScheduler.scheduleTask(SchedulerApplication.getApplicationContext(), selectedApp!!)
+
         var data = _installedAppListUIState.value.data.toMutableList()
         data.add(selectedApp!!)
 

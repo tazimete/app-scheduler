@@ -3,47 +3,33 @@ package com.interview.appscheduler.feature.scheduler.domain.worker
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.work.Constraints
-import androidx.work.NetworkType
+import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import java.util.Date
+import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
+import com.interview.appscheduler.library.DateUtils
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class TaskScheduler(private val context: Context) {
-    fun scheduleTaskNow() {
-        val workRequest = OneTimeWorkRequestBuilder<AppLauncherWorker>()
+class TaskScheduler  @Inject constructor() {
+    fun scheduleTask(context: Context, appEntity: AppEntity) {
+        var delayDate = DateUtils.getCalenderDate(appEntity.scheduledTime ?: "")
+
+        val inputData = Data.Builder()
+            .putString("PACKAGE_NAME", appEntity.packageName)
             .build()
 
-        WorkManager.getInstance(context).enqueue(workRequest)
-    }
-
-    fun scheduleTaskWithDelay(delayDate: Date) {
         val workRequest = OneTimeWorkRequestBuilder<AppLauncherWorker>()
             .setInitialDelay(delayDate.day.toLong(), TimeUnit.DAYS)
             .setInitialDelay(delayDate.hours.toLong(), TimeUnit.HOURS)
             .setInitialDelay(delayDate.minutes.toLong(), TimeUnit.MINUTES)
             .setInitialDelay(delayDate.seconds.toLong(), TimeUnit.SECONDS)
-            .build()
-
-        WorkManager.getInstance(context).enqueue(workRequest)
-    }
-
-    fun scheduleTaskWithConstraints() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresCharging(false)
-            .setRequiresBatteryNotLow(true)
-            .build()
-
-        val workRequest = OneTimeWorkRequestBuilder<AppLauncherWorker>()
-            .setConstraints(constraints)
+            .setInputData(inputData)
             .build()
 
         WorkManager.getInstance(context).enqueue(workRequest)
@@ -54,16 +40,10 @@ class AppLauncherWorker(val context: Context, params: WorkerParameters) : Worker
     override fun doWork(): Result {
         Log.d("MyWorker", "Task executed at: ${System.currentTimeMillis()}")
 
-        performScheduledTask()
+        val packageName = inputData.getString("PACKAGE_NAME") ?: "com.android.chrome" // Default to Chrome if no package name provided
+        launchApp(packageName)
 
         return Result.success()
-    }
-
-    private fun performScheduledTask() {
-        sendNotification("Scheduled Task", "Task executed successfully!")
-
-        val serviceIntent = Intent(applicationContext, MyBackgroundService::class.java)
-        applicationContext.startService(serviceIntent)
     }
 
     fun launchApp(packageName: String): Boolean {

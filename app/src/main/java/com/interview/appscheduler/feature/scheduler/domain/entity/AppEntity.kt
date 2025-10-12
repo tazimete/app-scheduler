@@ -2,7 +2,9 @@ package com.interview.appscheduler.feature.scheduler.domain.entity
 
 import android.graphics.drawable.Drawable
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class AppEntity(
     @SerializedName("id")
     var id: Long? = null,
