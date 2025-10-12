@@ -13,22 +13,25 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 import com.interview.appscheduler.library.DateUtils
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TaskScheduler  @Inject constructor() {
     fun scheduleTask(context: Context, appEntity: AppEntity) {
-        var delayDate = DateUtils.getCalenderDate(appEntity.scheduledTime ?: "")
+        val currentDate = Calendar.getInstance()
+        val scheduledDate = Calendar.getInstance()
+        scheduledDate.time = DateUtils.getCalenderDate(appEntity.scheduledTime ?: "")
+
+        val delayMillis = scheduledDate.timeInMillis - currentDate.timeInMillis
+        val delay = if (delayMillis > 0) delayMillis else 0
 
         val inputData = Data.Builder()
             .putString("PACKAGE_NAME", appEntity.packageName)
             .build()
 
         val workRequest = OneTimeWorkRequestBuilder<AppLauncherWorker>()
-            .setInitialDelay(delayDate.day.toLong(), TimeUnit.DAYS)
-            .setInitialDelay(delayDate.hours.toLong(), TimeUnit.HOURS)
-            .setInitialDelay(delayDate.minutes.toLong(), TimeUnit.MINUTES)
-            .setInitialDelay(delayDate.seconds.toLong(), TimeUnit.SECONDS)
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .setInputData(inputData)
             .build()
 

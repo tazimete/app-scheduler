@@ -211,12 +211,7 @@ fun DatePickerBottomSheet(onSelectDateTime: (Date) -> Unit) {
                     val calendar = Calendar.getInstance().apply {
                         timeInMillis = selectedDateMillis
                     }
-//                    val year = calendar.get(Calendar.YEAR)
-//                    val month = calendar.get(Calendar.MONTH) // 0-based
-//                    val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-//                    val calendar = Calendar.getInstance()
-//                    calendar.set(year, month, day, hours, minutes, 0)
                     calendar.set(Calendar.HOUR_OF_DAY, hours)
                     calendar.set(Calendar.MINUTE, minutes)
                     calendar.set(Calendar.SECOND, 0)
