@@ -8,9 +8,6 @@ import java.util.Locale
 class DateUtils {
     companion object {
         const val DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
-        const val DATE_FORMAT = "yyyy-MM-dd"
-        const val TIME_FORMAT = "HH:mm:ss"
-        const val TIME_FORMAT_SHORT = "HH:mm:ss"
 
         fun getCalendarDateToString(date: Date): String {
             val sdf = SimpleDateFormat(DATE_TIME_FORMAT, Locale.getDefault())
