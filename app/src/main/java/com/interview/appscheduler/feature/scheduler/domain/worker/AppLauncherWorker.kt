@@ -23,6 +23,10 @@ class AppLauncherWorker(val context: Context, params: WorkerParameters) : Worker
         return Result.success()
     }
 
+    override fun onStopped() {
+        super.onStopped()
+    }
+
     fun launchApp(packageName: String): Boolean {
         return try {
             val intent = this.context.packageManager.getLaunchIntentForPackage(packageName)

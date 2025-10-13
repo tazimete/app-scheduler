@@ -71,9 +71,37 @@ class AppSchedulerViewModel @Inject constructor(
         }
     }
 
-    fun createScheduledApp(appEntity: AppEntity, selectedDate: Date) {
+    fun addScheduleAppTask(appEntity: AppEntity, selectedDate: Date) {
         appEntity.scheduledTime = DateUtils.getCalendarDateToString(selectedDate)
 
+        // Schedule the app to worker thread using WorkManager
+        var workRequest = taskScheduler.addScheduleTask(
+            context = SchedulerApplication.getApplicationContext(),
+            appEntity = appEntity
+        )
+
+        appEntity.taskId = workRequest.id.toString()
+        // create scheduled app in database after successfully schedule the task
+        selectedApp = appEntity
+        createScheduledApp(appEntity)
+    }
+
+    fun updateScheduleAppTask(appEntity: AppEntity, selectedDate: Date) {
+        appEntity.scheduledTime = DateUtils.getCalendarDateToString(selectedDate)
+
+        // Schedule the app to worker thread using WorkManager
+        taskScheduler.updateScheduleTask(
+            context = SchedulerApplication.getApplicationContext(),
+            appEntity = appEntity
+        )
+
+        appEntity.taskId = workRequest.id.toString()
+        // create scheduled app in database after successfully schedule the task
+        selectedApp = appEntity
+        createScheduledApp(appEntity)
+    }
+
+    fun createScheduledApp(appEntity: AppEntity) {
         _installedAppListUIState.value = _installedAppListUIState.value.copy(isLoading = true, message = null)
 
         viewModelScope.launch(dispatcherProvider.main) {
@@ -129,9 +157,6 @@ class AppSchedulerViewModel @Inject constructor(
     // Handle success and failure responses
     private fun onSuccessCreateAppScheduleListResponse(response: Entity<Long>) {
         selectedApp?.id = response.data
-
-        // Schedule the app
-        taskScheduler.scheduleTask(SchedulerApplication.getApplicationContext(), selectedApp!!)
 
         var data = _installedAppListUIState.value.data.toMutableList()
         data.add(selectedApp!!)

@@ -10,6 +10,8 @@ data class AppEntity(
     var id: Long? = null,
     @SerializedName("appId")
     val appId: Int? = null,
+    @SerializedName("taskId")
+    var taskId: String,
     @SerializedName("name")
     val name: String,
     @SerializedName("packageName")
