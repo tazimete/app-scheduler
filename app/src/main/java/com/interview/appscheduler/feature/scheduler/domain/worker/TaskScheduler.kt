@@ -3,6 +3,7 @@ package com.interview.appscheduler.feature.scheduler.domain.worker
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import androidx.work.Data
+import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -14,7 +15,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TaskScheduler  @Inject constructor() {
-    fun scheduleTask(context: Context, appEntity: AppEntity) {
+    fun scheduleTask(context: Context, appEntity: AppEntity, onCompleteSchedule: (OneTimeWorkRequest)-> Unit) {
         val currentDate = Calendar.getInstance()
         val scheduledDate = Calendar.getInstance()
         scheduledDate.time = DateUtils.getCalenderDate(appEntity.scheduledTime ?: "")
@@ -32,6 +33,16 @@ class TaskScheduler  @Inject constructor() {
             .build()
 
         WorkManager.getInstance(context).enqueue(workRequest)
+
+        onCompleteSchedule(workRequest)
+    }
+
+    fun updateTask(context: Context, workId: UUID) {
+        WorkManager.getInstance(context).cancelWorkById(workId)
+    }
+
+    fun deleteTask(context: Context, workId: UUID) {
+        WorkManager.getInstance(context).cancelWorkById(workId)
     }
 
     fun observeWorkStatus(
