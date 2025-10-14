@@ -2,6 +2,7 @@ package com.interview.appscheduler.feature.scheduler.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo
 import com.interview.appscheduler.application.SchedulerApplication
 import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
@@ -12,6 +13,7 @@ import com.interview.appscheduler.feature.scheduler.domain.usecase.DeleteAppSche
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllInstalledAppListUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllScheduledAppListUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.UpdateAppScheduleUseCase
+import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleStatus
 import com.interview.appscheduler.feature.scheduler.domain.worker.TaskScheduler
 import com.interview.appscheduler.feature.scheduler.presentation.state.AppListUIState
 import com.interview.appscheduler.library.DateUtils
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import java.util.Date
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -71,6 +74,51 @@ class AppSchedulerViewModel @Inject constructor(
         }
     }
 
+    fun registerObserverForTaskStatus(
+        appEntities: List<AppEntity>
+    ) {
+        appEntities.map { appEntity->
+            observeTaskStatus(appEntity.taskId) { state->
+                when(state) {
+                    WorkInfo.State.SUCCEEDED -> {
+                        appEntity.status = ScheduleStatus.COMPLETED.getStatusValue()
+                    }
+                    WorkInfo.State.FAILED -> {
+                        appEntity.status = ScheduleStatus.FAILED.getStatusValue()
+                    }
+                    WorkInfo.State.BLOCKED -> {
+                        appEntity.status = ScheduleStatus.BLOCKED.getStatusValue()
+                    }
+                    WorkInfo.State.CANCELLED -> {
+                        appEntity.status = ScheduleStatus.CANCELLED.getStatusValue()
+                    }
+
+                    WorkInfo.State.ENQUEUED -> {}
+                    WorkInfo.State.RUNNING -> {}
+                }
+
+                // Update the app status in database
+                updateScheduledApp(appEntity)
+            }
+        }
+    }
+
+    fun observeTaskStatus(
+        workId: String,
+        onStatusChanged: (WorkInfo.State) -> Unit
+    ) {
+        val context = SchedulerApplication.getApplicationContext()
+        viewModelScope.launch(dispatcherProvider.main) {
+            taskScheduler.observeWorkStatus(
+                context = context,
+                workId = UUID.fromString(workId),
+                onStatusChanged = { status ->
+                    onStatusChanged(status)
+                }
+            )
+        }
+    }
+
     fun addScheduleAppTask(appEntity: AppEntity, selectedDate: Date) {
         val context = SchedulerApplication.getApplicationContext()
         appEntity.scheduledTime = DateUtils.getCalendarDateToString(selectedDate)
@@ -113,6 +161,8 @@ class AppSchedulerViewModel @Inject constructor(
 
     fun createScheduledApp(appEntity: AppEntity) {
         _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+
+        appEntity.status = ScheduleStatus.SCHEDULED.getStatusValue()
 
         viewModelScope.launch(dispatcherProvider.main) {
             createAppScheduleUseCase.invoke(appEntity)
@@ -176,8 +226,9 @@ fun updateScheduledApp(appEntity: AppEntity) {
     }
 
     private fun onSuccessGetAllScheduledAppListResponse(response: Entity<List<AppEntity>>) {
-        response.data?.let {
+        registerObserverForTaskStatus(response.data ?: emptyList())
 
+        response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
                 message = "Get all scheduled app list successfully",

@@ -9,10 +9,12 @@ import com.interview.appscheduler.feature.scheduler.data.entity.toDomainEntity
 import com.interview.appscheduler.feature.scheduler.data.source.local.AbstractAppSchedulerLocalDataSource
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 import com.interview.appscheduler.feature.scheduler.domain.repository.AbstractAppSchedulerRepository
+import com.interview.appscheduler.library.DateUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.util.Date
 import javax.inject.Inject
 
 class AppSchedulerRepository @Inject constructor(
@@ -93,6 +95,7 @@ class AppSchedulerRepository @Inject constructor(
                     icon = packageManager.getApplicationIcon(applicationInfo.packageName),
                     versionName = packageInfo.versionName,
                     versionCode = packageInfo.longVersionCode,
+                    installedTime = DateUtils.getCalendarDateToString(Date(packageInfo.firstInstallTime)),
                     isSystemApp = applicationInfo.flags != 0,
                     isScheduled = false
                 )

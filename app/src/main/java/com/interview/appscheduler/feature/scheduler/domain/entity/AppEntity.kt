@@ -27,7 +27,7 @@ data class AppEntity(
     @SerializedName("scheduledTime")
     var scheduledTime: String? = null,
     @SerializedName("installedTime")
-    val installedTime: String? = null,
+    val installedTime: String,
     @SerializedName("status")
-    val status: Int? = null
+    var status: Int? = null
 )

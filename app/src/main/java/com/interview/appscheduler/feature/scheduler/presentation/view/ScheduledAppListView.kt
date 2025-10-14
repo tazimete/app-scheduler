@@ -42,6 +42,7 @@ import com.interview.appscheduler.feature.installedapp.presentation.view.DatePic
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.presentation.view.subview.AppItemView
 import com.interview.appscheduler.feature.scheduler.presentation.viewmodel.AppSchedulerViewModel
+import com.interview.appscheduler.library.DateUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,6 +67,7 @@ fun ScheduledAppListView(
             sheetState = bottomSheetState
         ) {
             DatePickerBottomSheet(
+                selectedDate = DateUtils.getCalenderDate((viewModel.selectedApp?.scheduledTime) ?: ""),
                 onSelectDateTime = { date->
                     viewModel.updateScheduledAppTask(viewModel.selectedApp!!, date)
                     showBottomSheet.value = false

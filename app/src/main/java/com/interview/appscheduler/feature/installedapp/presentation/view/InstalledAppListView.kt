@@ -23,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +52,7 @@ import com.interview.appscheduler.component.NoDataView
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.presentation.view.subview.AppItemView
 import com.interview.appscheduler.feature.scheduler.presentation.viewmodel.AppSchedulerViewModel
+import com.interview.appscheduler.library.DateUtils
 import java.util.Calendar
 import java.util.Date
 
@@ -77,6 +79,7 @@ fun InstalledAppListView(
             sheetState = bottomSheetState
         ) {
             DatePickerBottomSheet(
+                selectedDate = DateUtils.getDeviceLocalDate(),
                 onSelectDateTime = { date->
                     viewModel.addScheduleAppTask(viewModel.selectedApp!!, date)
                     showBottomSheet.value = false
@@ -173,11 +176,19 @@ fun AddToScheduleButton(
 
 
 @Composable
-fun DatePickerBottomSheet(onSelectDateTime: (Date) -> Unit) {
+fun DatePickerBottomSheet(selectedDate: Date? = null, onSelectDateTime: (Date) -> Unit) {
     // Bottom sheet state
     val bottomSheetScrollState = rememberScrollState()
-    val datePickerState = rememberDatePickerState()
-    val timePickerState = rememberTimePickerState()
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate?.time ?: Date().time,
+        initialDisplayedMonthMillis = selectedDate?.time ?: Date().time,
+        yearRange = IntRange(DateUtils.getDeviceLocalDate().year, 2100)
+    )
+    val timePickerState = rememberTimePickerState(
+        initialHour = selectedDate?.hours ?: Date().hours,
+        initialMinute = selectedDate?.minutes ?: Date().minutes,
+        is24Hour = true
+    )
 
     Box(
         modifier = Modifier

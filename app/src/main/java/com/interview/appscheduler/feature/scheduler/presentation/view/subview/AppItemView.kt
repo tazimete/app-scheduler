@@ -36,6 +36,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
+import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleStatus
+import com.interview.appscheduler.library.DateUtils
 
 @Composable
 fun AppItemView(
@@ -86,10 +88,26 @@ fun AppItemView(
                     color = Color.Black
                 )
                 Text(
-                    text = "Scheduled: ${item.scheduledTime}",
+                    text = "${if(item.scheduledTime != null) "Scheduled:" else "Installed:"} ${DateUtils.getReadableStringFromDate(item.scheduledTime ?: item.installedTime)}",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
+
+                //if the view type is scheduled app, then show the status
+                if(item.scheduledTime != null) {
+                    Text(
+                        text = ScheduleStatus.getStatusFromValue(item.status ?: 0).getStatusText(),
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        modifier = Modifier
+                            .background(
+                                ScheduleStatus.getStatusFromValue(item.status ?: 0)
+                                    .getStatusColor(),
+                                shape = RoundedCornerShape(6.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
 
             // Add Button
