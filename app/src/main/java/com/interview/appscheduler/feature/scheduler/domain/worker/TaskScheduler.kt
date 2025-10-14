@@ -2,20 +2,17 @@ package com.interview.appscheduler.feature.scheduler.domain.worker
 
 import android.content.Context
 import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.Operation
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkManager.UpdateResult
-import androidx.work.await
-import com.google.common.util.concurrent.ListenableFuture
-import com.interview.appscheduler.core.worker.DefaultDispatcherProvider
 import com.interview.appscheduler.core.worker.DispatcherProvider
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 import com.interview.appscheduler.library.DateUtils
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -25,7 +22,6 @@ class TaskScheduler  @Inject constructor(
     val dispatcherProvider: DispatcherProvider
 ) {
     private fun createWorkRequest(
-        context: Context,
         appEntity: AppEntity,
         isUpdate: Boolean = false
     ): OneTimeWorkRequest {
@@ -56,34 +52,32 @@ class TaskScheduler  @Inject constructor(
         return workRequest
     }
 
-    suspend fun addScheduleTask(context: Context, appEntity: AppEntity): OneTimeWorkRequest? {
-        val workRequest = createWorkRequest(context, appEntity)
-        val result = WorkManager.getInstance(context).enqueue(workRequest)
-
-        val updateResult: Operation.State = withContext(dispatcherProvider.io) {
-            result.await()
-        }
+    fun addScheduleTask(context: Context, appEntity: AppEntity): OneTimeWorkRequest {
+        val workRequest = createWorkRequest(appEntity)
+//        val result = WorkManager.getInstance(context).enqueue(workRequest)
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            appEntity.scheduledTime ?: "",
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
 
         return workRequest
     }
 
-    suspend fun updateScheduleTask(context: Context, appEntity: AppEntity): OneTimeWorkRequest? {
-        var workRequest = createWorkRequest(context, appEntity, true)
+    fun updateScheduleTask(context: Context, appEntity: AppEntity): UpdateResult {
+        var workRequest = createWorkRequest(appEntity, true)
         val result = WorkManager.getInstance(context).updateWork(workRequest)
 
-        val updateResult = withContext(dispatcherProvider.io) {
-            result.await()
-        }
+        val updateResult = result.get()
 
-        return workRequest
+        return updateResult
     }
 
-    suspend fun deleteScheduleTask(context: Context, appEntity: AppEntity): Operation.State {
-        val result = WorkManager.getInstance(context).cancelWorkById(UUID.fromString(appEntity.taskId))
+    fun deleteScheduleTask(context: Context, appEntity: AppEntity): Operation.State {
+        val uuid = UUID.fromString(appEntity.taskId)
+        val result = WorkManager.getInstance(context).cancelWorkById(uuid)
 
-        val updateResult: Operation.State = withContext(dispatcherProvider.io) {
-            result.await()
-        }
+        val updateResult: Operation.State = result.result.get()
 
         return updateResult
     }
