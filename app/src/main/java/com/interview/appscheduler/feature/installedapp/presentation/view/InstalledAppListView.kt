@@ -80,6 +80,7 @@ fun InstalledAppListView(
                 onSelectDateTime = { date->
                     viewModel.addScheduleAppTask(viewModel.selectedApp!!, date)
                     showBottomSheet.value = false
+                    coordinator.back()
                 }
             )
         }

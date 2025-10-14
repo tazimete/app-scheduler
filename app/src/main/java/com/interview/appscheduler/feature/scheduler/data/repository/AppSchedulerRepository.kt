@@ -87,6 +87,7 @@ class AppSchedulerRepository @Inject constructor(
                 val packageInfo = packageManager.getPackageInfo(applicationInfo.packageName, 0)
 
                 val appEntity = AppEntity(
+                    taskId = "",
                     name = appName,
                     packageName = applicationInfo.packageName,
                     icon = packageManager.getApplicationIcon(applicationInfo.packageName),

@@ -114,7 +114,7 @@ fun AppItemView(
 
             // Edit Button
             if(showEditButton) {
-                IconButton(onClick = onClickDelete) {
+                IconButton(onClick = onClickEdit) {
                     Icon(
                         modifier = Modifier
                             .width(28.dp)

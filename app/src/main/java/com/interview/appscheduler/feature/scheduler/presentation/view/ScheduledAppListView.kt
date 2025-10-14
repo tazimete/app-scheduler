@@ -19,13 +19,17 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.interview.appscheduler.component.NoDataView
+import com.interview.appscheduler.feature.installedapp.presentation.view.DatePickerBottomSheet
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.presentation.view.subview.AppItemView
 import com.interview.appscheduler.feature.scheduler.presentation.viewmodel.AppSchedulerViewModel
@@ -45,11 +50,28 @@ fun ScheduledAppListView(
     viewModel: AppSchedulerViewModel = hiltViewModel<AppSchedulerViewModel>(),
     coordinator: ScheduledAppListCoordinator,
 )  {
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val showBottomSheet = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
-    val appListUiState by viewModel.appListUIState.collectAsState()
+    val appListUiState by viewModel.scheduledAppListUIState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getAllScheduledAppList()
+    }
+
+    //show bottom sheet with date and time picker
+    if (showBottomSheet.value) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet.value = false },
+            sheetState = bottomSheetState
+        ) {
+            DatePickerBottomSheet(
+                onSelectDateTime = { date->
+                    viewModel.updateScheduledAppTask(viewModel.selectedApp!!, date)
+                    showBottomSheet.value = false
+                }
+            )
+        }
     }
 
     Scaffold(
@@ -97,10 +119,12 @@ fun ScheduledAppListView(
                     showEditButton = true,
                     showDeleteButton = true,
                     onClickEdit = {
-                        // Handle add button click
+                        viewModel.selectedApp = app
+                        showBottomSheet.value = true
                     },
                     onClickDelete = {
-                        // Handle delete button click
+                        viewModel.selectedApp = app
+                        viewModel.deleteScheduledAppTask(viewModel.selectedApp!!)
                     }
                 )
             }

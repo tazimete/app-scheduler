@@ -2,13 +2,10 @@ package com.interview.appscheduler.feature.scheduler.domain.worker
 
 import android.content.Context
 import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.Operation
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.WorkManager.UpdateResult
 import com.interview.appscheduler.core.worker.DispatcherProvider
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 import com.interview.appscheduler.library.DateUtils
@@ -54,32 +51,22 @@ class TaskScheduler  @Inject constructor(
 
     fun addScheduleTask(context: Context, appEntity: AppEntity): OneTimeWorkRequest {
         val workRequest = createWorkRequest(appEntity)
-//        val result = WorkManager.getInstance(context).enqueue(workRequest)
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            appEntity.scheduledTime ?: "",
-            ExistingWorkPolicy.REPLACE,
-            workRequest
-        )
+        WorkManager.getInstance(context).enqueue(workRequest)
+        return workRequest
+    }
+
+    fun updateScheduleTask(context: Context, appEntity: AppEntity): OneTimeWorkRequest {
+        var workRequest = createWorkRequest(appEntity, true)
+        WorkManager.getInstance(context).updateWork(workRequest)
 
         return workRequest
     }
 
-    fun updateScheduleTask(context: Context, appEntity: AppEntity): UpdateResult {
-        var workRequest = createWorkRequest(appEntity, true)
-        val result = WorkManager.getInstance(context).updateWork(workRequest)
-
-        val updateResult = result.get()
-
-        return updateResult
-    }
-
-    fun deleteScheduleTask(context: Context, appEntity: AppEntity): Operation.State {
+    fun deleteScheduleTask(context: Context, appEntity: AppEntity): UUID {
         val uuid = UUID.fromString(appEntity.taskId)
-        val result = WorkManager.getInstance(context).cancelWorkById(uuid)
+        WorkManager.getInstance(context).cancelWorkById(uuid)
 
-        val updateResult: Operation.State = result.result.get()
-
-        return updateResult
+        return uuid
     }
 
     suspend fun observeWorkStatus(
