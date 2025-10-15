@@ -20,6 +20,20 @@ import javax.inject.Inject
 class AppSchedulerRepository @Inject constructor(
     private val localDataSource: AbstractAppSchedulerLocalDataSource
 ) : AbstractAppSchedulerRepository {
+
+    override suspend fun getAppSchedule(scheduledTime: String): Flow<Result<Entity<AppEntity>>> {
+        return localDataSource.getAppSchedule(scheduledTime)
+            .map { result ->
+                result.map { data ->
+                    Entity<AppEntity>(
+                        isSuccess = data.isSuccess,
+                        message = data.message,
+                        data = data.data?.toDomainEntity(),
+                    )
+                }
+            }
+    }
+
     override suspend fun createAppSchedule(item: AppEntity): Flow<Result<Entity<Long>>> {
         return localDataSource.createAppSchedule(item.toDataEntity())
             .map { result ->

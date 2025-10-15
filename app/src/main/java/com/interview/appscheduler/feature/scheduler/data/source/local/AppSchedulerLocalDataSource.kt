@@ -12,6 +12,16 @@ import javax.inject.Inject
 class AppSchedulerLocalDataSource @Inject constructor(
     private val appSchedulerDao: AppSchedulerDao,
 ) : AbstractAppSchedulerLocalDataSource {
+
+    override suspend fun getAppSchedule(scheduledTime: String): Flow<Result<Response<AppSchedulerTableEntity>>> = flow {
+        val app = appSchedulerDao.getByScheduledTime(scheduledTime)
+
+        emit(Result.success(Response(isSuccess = true, message = "Get app schedule successfully", data = app)))
+    }.catch { e ->
+        val errorEntity = ErrorEntity.DatabaseAccessingError(404, "Failed to get app schedule")
+        emit(Result.failure(errorEntity))
+    }
+
     override suspend fun createAppSchedule(item: AppSchedulerTableEntity): Flow<Result<Response<Long>>> = flow {
         val existingApp = appSchedulerDao.getByScheduledTime(item.scheduledTime)
         if (existingApp != null) {

@@ -5,6 +5,7 @@ import com.interview.appscheduler.feature.scheduler.data.entity.AppSchedulerTabl
 import kotlinx.coroutines.flow.Flow
 
 interface AbstractAppSchedulerLocalDataSource {
+    suspend fun getAppSchedule(scheduledTime: String): Flow<Result<Response<AppSchedulerTableEntity>>>
     suspend fun createAppSchedule(item: AppSchedulerTableEntity): Flow<Result<Response<Long>>>
     suspend fun updateAppSchedule(item: AppSchedulerTableEntity): Flow<Result<Response<Int>>>
     suspend fun deleteAppSchedule(item: AppSchedulerTableEntity): Flow<Result<Response<Int>>>

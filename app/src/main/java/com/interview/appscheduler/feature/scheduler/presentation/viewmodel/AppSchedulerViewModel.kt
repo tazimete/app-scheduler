@@ -12,6 +12,7 @@ import com.interview.appscheduler.feature.scheduler.domain.usecase.CreateAppSche
 import com.interview.appscheduler.feature.scheduler.domain.usecase.DeleteAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllInstalledAppListUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllScheduledAppListUseCase
+import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.UpdateAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleStatus
 import com.interview.appscheduler.feature.scheduler.domain.worker.TaskScheduler
@@ -31,6 +32,7 @@ import javax.inject.Inject
 class AppSchedulerViewModel @Inject constructor(
     private val getAllInstalledAppListUseCase: GetAllInstalledAppListUseCase,
     private val getAllScheduledAppListUseCase: GetAllScheduledAppListUseCase,
+    private val getAppScheduleUseCase: GetAppScheduleUseCase,
     private val createAppScheduleUseCase: CreateAppScheduleUseCase,
     private val updateAppScheduleUseCase: UpdateAppScheduleUseCase,
     private val deleteAppScheduleUseCase: DeleteAppScheduleUseCase,
@@ -177,6 +179,21 @@ class AppSchedulerViewModel @Inject constructor(
         deleteScheduledApp(appEntity)
     }
 
+    fun getScheduledApp(scheduledTime: String) {
+        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+
+        viewModelScope.launch(dispatcherProvider.main) {
+            getAppScheduleUseCase.invoke(scheduledTime)
+                .flowOn(dispatcherProvider.io)
+                .collect { result ->
+                    result.fold(
+                        { entity -> onSuccessGetAppScheduleResponse(entity) },
+                        { error -> onFailedResponse(error) }
+                    )
+                }
+        }
+    }
+
     fun createScheduledApp(appEntity: AppEntity) {
         _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
 
@@ -263,6 +280,18 @@ fun updateScheduledApp(appEntity: AppEntity) {
         }
     }
 
+    // Handle success response for get app shedule by scheduled time
+    private fun onSuccessGetAppScheduleResponse(response: Entity<AppEntity>) {
+        if(response.data != null) {
+            _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
+                isLoading = false,
+                message = "Time conflicts with another schedule, Please choose a different time",
+            )
+        } else {
+            
+        }
+    }
+
     // Handle success and failure responses
     private fun onSuccessCreateAppScheduleListResponse(response: Entity<Long>) {
         selectedApp?.id = response.data
@@ -288,8 +317,6 @@ fun updateScheduledApp(appEntity: AppEntity) {
                 )
             )
         }
-
-//        selectedApp = null // clear selected app after add
     }
 
     // Handle success update app schedule response
