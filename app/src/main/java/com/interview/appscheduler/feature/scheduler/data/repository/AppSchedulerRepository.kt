@@ -2,6 +2,7 @@ package com.interview.appscheduler.feature.scheduler.data.repository
 
 import android.content.pm.PackageManager
 import com.interview.appscheduler.application.SchedulerApplication
+import com.interview.appscheduler.asset.string.StringAssets
 import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
 import com.interview.appscheduler.feature.scheduler.data.entity.toDataEntity
@@ -117,9 +118,9 @@ class AppSchedulerRepository @Inject constructor(
                 appEntities.add(appEntity)
             }
 
-            emit(Result.success(Entity(isSuccess = true, message = "Get all installed app scheduler successfully", data = appEntities.toList())))
+            emit(Result.success(Entity(isSuccess = true, message = StringAssets.GET_ALL_INSTALLED_APPS.value, data = appEntities.toList())))
         }.catch { e ->
-            val errorEntity = ErrorEntity.DatabaseAccessingError(404, "Failed to load installed app scheduler from os")
+            val errorEntity = ErrorEntity.DatabaseAccessingError(404, StringAssets.FAILED_TO_GET_ALL_INSTALLED_APPS.value)
             emit(Result.failure(errorEntity))
         }
 }
