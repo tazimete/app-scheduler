@@ -77,28 +77,42 @@ class AppSchedulerViewModel @Inject constructor(
     fun registerObserverForTaskStatus(
         appEntities: List<AppEntity>
     ) {
-        appEntities.map { appEntity->
+        appEntities.filter { it.status != ScheduleStatus.COMPLETED.getStatusValue() }.map { appEntity->
             observeTaskStatus(appEntity.taskId) { state->
                 when(state) {
                     WorkInfo.State.SUCCEEDED -> {
                         appEntity.status = ScheduleStatus.COMPLETED.getStatusValue()
+                        // Update the app status in database
+                        selectedApp = appEntity
+                        updateScheduledApp(appEntity)
                     }
                     WorkInfo.State.FAILED -> {
                         appEntity.status = ScheduleStatus.FAILED.getStatusValue()
+                        // Update the app status in database
+                        selectedApp = appEntity
+                        updateScheduledApp(appEntity)
                     }
                     WorkInfo.State.BLOCKED -> {
                         appEntity.status = ScheduleStatus.BLOCKED.getStatusValue()
+                        // Update the app status in database
+                        selectedApp = appEntity
+                        updateScheduledApp(appEntity)
                     }
                     WorkInfo.State.CANCELLED -> {
                         appEntity.status = ScheduleStatus.CANCELLED.getStatusValue()
+                        // Update the app status in database
+                        selectedApp = appEntity
+                        updateScheduledApp(appEntity)
                     }
 
                     WorkInfo.State.ENQUEUED -> {}
-                    WorkInfo.State.RUNNING -> {}
+                    WorkInfo.State.RUNNING -> {
+                        appEntity.status = ScheduleStatus.RUNNING.getStatusValue()
+                        // Update the app status in database
+                        selectedApp = appEntity
+                        updateScheduledApp(appEntity)
+                    }
                 }
-
-                // Update the app status in database
-                updateScheduledApp(appEntity)
             }
         }
     }
@@ -139,11 +153,14 @@ class AppSchedulerViewModel @Inject constructor(
         appEntity.scheduledTime = DateUtils.getCalendarDateToString(selectedDate)
 
         // Update the scheduled app to worker thread using WorkManager
-        var result = taskScheduler.updateScheduleTask(
+        var workRequest = taskScheduler.updateScheduleTask(
             context = context,
             appEntity = appEntity
         )
 
+        appEntity.taskId = workRequest.id.toString()
+        appEntity.status = ScheduleStatus.SCHEDULED.getStatusValue()
+        selectedApp = appEntity
         updateScheduledApp(appEntity)
     }
 
@@ -252,6 +269,9 @@ fun updateScheduledApp(appEntity: AppEntity) {
         var data = _scheduledAppListUIState.value.data.toMutableList()
         data.add(selectedApp!!)
 
+        //register observer
+        registerObserverForTaskStatus(data)
+
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
@@ -268,7 +288,7 @@ fun updateScheduledApp(appEntity: AppEntity) {
             )
         }
 
-        selectedApp = null // clear selected app after add
+//        selectedApp = null // clear selected app after add
     }
 
     // Handle success update app schedule response
@@ -299,6 +319,9 @@ fun updateScheduledApp(appEntity: AppEntity) {
             }.toMutableList()
         }
 
+        //register observer
+        registerObserverForTaskStatus(data)
+
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
@@ -315,7 +338,7 @@ fun updateScheduledApp(appEntity: AppEntity) {
             )
         }
 
-        selectedApp = null // clear selected app after update
+//        selectedApp = null // clear selected app after update
     }
 
     // Handle success delete app schedule response

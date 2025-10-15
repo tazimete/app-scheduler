@@ -50,14 +50,16 @@ class TaskScheduler  @Inject constructor(
     }
 
     fun addScheduleTask(context: Context, appEntity: AppEntity): OneTimeWorkRequest {
-        val workRequest = createWorkRequest(appEntity)
+        val workRequest = createWorkRequest(appEntity, false)
         WorkManager.getInstance(context).enqueue(workRequest)
         return workRequest
     }
 
     fun updateScheduleTask(context: Context, appEntity: AppEntity): OneTimeWorkRequest {
-        var workRequest = createWorkRequest(appEntity, true)
-        WorkManager.getInstance(context).updateWork(workRequest)
+        WorkManager.getInstance(context).cancelWorkById(UUID.fromString(appEntity.taskId))
+        var workRequest = createWorkRequest(appEntity, false)
+//        WorkManager.getInstance(context).updateWork(workRequest)
+        WorkManager.getInstance(context).enqueue(workRequest)
 
         return workRequest
     }

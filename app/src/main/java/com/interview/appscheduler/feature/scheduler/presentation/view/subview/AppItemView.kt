@@ -89,7 +89,7 @@ fun AppItemView(
                 )
                 Text(
                     text = "${if(item.scheduledTime != null) "Scheduled:" else "Installed:"} ${DateUtils.getReadableStringFromDate(item.scheduledTime ?: item.installedTime)}",
-                    fontSize = 14.sp,
+                    fontSize = 11.sp,
                     color = Color.Gray
                 )
 
@@ -97,7 +97,7 @@ fun AppItemView(
                 if(item.scheduledTime != null) {
                     Text(
                         text = ScheduleStatus.getStatusFromValue(item.status ?: 0).getStatusText(),
-                        fontSize = 14.sp,
+                        fontSize = 11.sp,
                         color = Color.White,
                         modifier = Modifier
                             .background(
@@ -105,7 +105,7 @@ fun AppItemView(
                                     .getStatusColor(),
                                 shape = RoundedCornerShape(6.dp)
                             )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .padding(horizontal = 8.dp, vertical = 2.5.dp)
                     )
                 }
             }

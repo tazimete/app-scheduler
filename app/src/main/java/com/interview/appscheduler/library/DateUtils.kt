@@ -9,7 +9,7 @@ import java.util.TimeZone
 class DateUtils {
     companion object {
         const val DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
-        const val DATE_TIME_READABLE_FORMAT = "yyyy, dd MMM at HH:mm"
+        const val DATE_TIME_READABLE_FORMAT = "yyyy, dd MMM 'at' HH:mm"
 
         fun getDeviceLocalDate(): Date {
             return Calendar.getInstance().time
