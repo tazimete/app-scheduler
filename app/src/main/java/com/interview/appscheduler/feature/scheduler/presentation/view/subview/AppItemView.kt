@@ -89,7 +89,7 @@ fun AppItemView(
                 )
                 Text(
                     text = "${if(item.scheduledTime != null) "Scheduled:" else "Installed:"} ${DateUtils.getReadableStringFromDate(item.scheduledTime ?: item.installedTime)}",
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = Color.Gray
                 )
 
@@ -139,7 +139,7 @@ fun AppItemView(
                             .height(28.dp)
                             .background(Color.Transparent)
                             .border(
-                                width = 0.6.dp,
+                                width = 0.3.dp,
                                 color = Color(0xFF00966E),
                                 shape = RoundedCornerShape(4.dp)
                             ),
@@ -159,7 +159,7 @@ fun AppItemView(
                             .height(28.dp)
                             .background(Color.Transparent)
                             .border(
-                                width = 0.6.dp,
+                                width = 0.3.dp,
                                 color = Color.Red.copy(alpha = 0.8f),
                                 shape = RoundedCornerShape(4.dp)
                             ),

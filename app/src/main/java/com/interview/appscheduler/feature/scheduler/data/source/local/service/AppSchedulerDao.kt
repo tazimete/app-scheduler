@@ -9,8 +9,8 @@ import com.interview.appscheduler.feature.scheduler.data.entity.AppSchedulerTabl
 
 @Dao
 abstract class AppSchedulerDao(roomDatabase: RoomDatabase) : BaseDao<AppSchedulerTableEntity>(RoomDBEntities.app_scheduler_table, roomDatabase){
-    @Query("select count(1) from ${RoomDBEntities.app_scheduler_table}")
-    abstract fun getCount():Int
+    @Query("SELECT * FROM ${RoomDBEntities.app_scheduler_table} WHERE scheduledTime = :scheduledTime LIMIT 1")
+    abstract fun getByScheduledTime(scheduledTime: String): AppSchedulerTableEntity?
 
     @Query("select * from ${RoomDBEntities.app_scheduler_table}")
     abstract fun getAll(): List<AppSchedulerTableEntity>

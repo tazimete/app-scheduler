@@ -16,4 +16,5 @@ sealed class ErrorEntity (
     data class FileWritingError(val errorCode: Int, val errorMessage: String? = null) : ErrorEntity(errorCode, errorMessage)
     data class FileRemovingError(val errorCode: Int, val errorMessage: String? = null) : ErrorEntity(errorCode, errorMessage)
     data class NotFound(val errorCode: Int, val errorMessage: String? = null) : ErrorEntity(errorCode, errorMessage)
+    data class NotUniqueData(val errorCode: Int, val errorMessage: String? = null) : ErrorEntity(errorCode, errorMessage)
 }

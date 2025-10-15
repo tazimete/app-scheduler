@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
@@ -65,11 +66,19 @@ fun InstalledAppListView(
 )  {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val showBottomSheet = remember { mutableStateOf(false) }
+    val snackBarHostState = remember { SnackbarHostState() }
     val lazyListState = rememberLazyListState()
     val appListUiState by viewModel.installedAppListUIState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getAllInstalledApps()
+    }
+
+    //show snackbar for message
+    LaunchedEffect(appListUiState.message) {
+        appListUiState.message?.let {
+            snackBarHostState.showSnackbar(it)
+        }
     }
 
     //show bottom sheet with date and time picker

@@ -21,6 +21,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -30,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,9 +44,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.interview.appscheduler.component.NoDataView
 import com.interview.appscheduler.feature.installedapp.presentation.view.DatePickerBottomSheet
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
+import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleStatus
 import com.interview.appscheduler.feature.scheduler.presentation.view.subview.AppItemView
 import com.interview.appscheduler.feature.scheduler.presentation.viewmodel.AppSchedulerViewModel
 import com.interview.appscheduler.library.DateUtils
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,11 +59,22 @@ fun ScheduledAppListView(
 )  {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val showBottomSheet = remember { mutableStateOf(false) }
+    val snackBarHostState = remember { SnackbarHostState() }
+    val snackBarScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val appListUiState by viewModel.scheduledAppListUIState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.getAllScheduledAppList()
+    }
+
+    //show snackbar for message
+    LaunchedEffect(appListUiState.message) {
+        appListUiState.message?.let {
+            snackBarScope.launch {
+                snackBarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+            }
+        }
     }
 
     //show bottom sheet with date and time picker
@@ -77,6 +94,7 @@ fun ScheduledAppListView(
     }
 
     Scaffold(
+        snackbarHost = @Composable { SnackbarHost(hostState = snackBarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Scheduled Apps (${appListUiState.data.count()})") },
@@ -121,8 +139,12 @@ fun ScheduledAppListView(
                     showEditButton = true,
                     showDeleteButton = true,
                     onClickEdit = {
-                        viewModel.selectedApp = app
-                        showBottomSheet.value = true
+                        if(app.status != ScheduleStatus.COMPLETED.getStatusValue()) {
+                            viewModel.selectedApp = app
+                            showBottomSheet.value = true
+                        } else {
+                            viewModel.showMessage("This app schedule is already completed and cannot be edited.")
+                        }
                     },
                     onClickDelete = {
                         viewModel.selectedApp = app

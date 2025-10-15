@@ -13,6 +13,12 @@ class AppSchedulerLocalDataSource @Inject constructor(
     private val appSchedulerDao: AppSchedulerDao,
 ) : AbstractAppSchedulerLocalDataSource {
     override suspend fun createAppSchedule(item: AppSchedulerTableEntity): Flow<Result<Response<Long>>> = flow {
+        val existingApp = appSchedulerDao.getByScheduledTime(item.scheduledTime)
+        if (existingApp != null) {
+            emit(Result.failure(ErrorEntity.NotUniqueData(409, "An app schedule already exists given time, Please choose a different time")))
+            return@flow
+        }
+
         val data = appSchedulerDao.insert(item)
         if ( data > 0) {
             emit(Result.success(Response(isSuccess = true, message = "Created app schedule successfully", data = data)))
@@ -25,6 +31,12 @@ class AppSchedulerLocalDataSource @Inject constructor(
     }
 
     override suspend fun updateAppSchedule(item: AppSchedulerTableEntity): Flow<Result<Response<Int>>> = flow {
+        val existingApp = appSchedulerDao.getByScheduledTime(item.scheduledTime)
+        if (existingApp != null) {
+            emit(Result.failure(ErrorEntity.NotUniqueData(409, "An app schedule already exists given time, Please choose a different time")))
+            return@flow
+        }
+
         val data = appSchedulerDao.update(item)
         if ( data > 0) {
             emit(Result.success(Response(isSuccess = true, message = "Updated app schedule successfully", data = data)))
