@@ -14,6 +14,7 @@ import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllInstall
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllScheduledAppListUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.UpdateAppScheduleUseCase
+import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleActionType
 import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleStatus
 import com.interview.appscheduler.feature.scheduler.domain.worker.TaskScheduler
 import com.interview.appscheduler.feature.scheduler.presentation.state.AppListUIState
@@ -39,16 +40,21 @@ class AppSchedulerViewModel @Inject constructor(
     private val taskScheduler: TaskScheduler,
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
-    private val _scheduledAppListUIState = MutableStateFlow(AppListUIState(isLoading = true))
+    private val _scheduledAppListUIState =
+        MutableStateFlow(AppListUIState(initialLoad = true, isLoading = true))
     val scheduledAppListUIState = _scheduledAppListUIState.asStateFlow()
 
-    private val _installedAppListUIState = MutableStateFlow(AppListUIState(isLoading = true))
+    private val _installedAppListUIState =
+        MutableStateFlow(AppListUIState(initialLoad = true, isLoading = true))
     val installedAppListUIState = _installedAppListUIState.asStateFlow()
 
     var selectedApp: AppEntity? = null
+    var selectedDate: Date? = null
+    var actionType: ScheduleActionType = ScheduleActionType.ADD
 
     fun getAllScheduledAppList() {
-        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+        _scheduledAppListUIState.value =
+            _scheduledAppListUIState.value.copy(isLoading = true, message = null)
 
         viewModelScope.launch(dispatcherProvider.main) {
             getAllScheduledAppListUseCase.invoke()
@@ -63,7 +69,8 @@ class AppSchedulerViewModel @Inject constructor(
     }
 
     fun getAllInstalledApps() {
-        _installedAppListUIState.value = _installedAppListUIState.value.copy(isLoading = true, message = null)
+        _installedAppListUIState.value =
+            _installedAppListUIState.value.copy(isLoading = true, message = null)
 
         viewModelScope.launch(dispatcherProvider.main) {
             getAllInstalledAppListUseCase.invoke()
@@ -80,27 +87,44 @@ class AppSchedulerViewModel @Inject constructor(
     fun registerObserverForTaskStatus(
         appEntities: List<AppEntity>
     ) {
-        appEntities.filter { it.status != ScheduleStatus.COMPLETED.getStatusValue() }.map { appEntity->
-            observeTaskStatus(appEntity.taskId) { state->
-                when(state) {
+        val taskIds = appEntities
+            .filter {app-> app.status != ScheduleStatus.COMPLETED.getStatusValue() }
+            .map { it.taskId }.filter { it.isNotEmpty() }
+
+        if(taskIds.isEmpty()) return // no tasks to observe
+
+        observeTasksStatus(
+            taskIds
+        ) { workInfoList ->
+            val appEntity = appEntities.firstOrNull {
+                    app-> app.taskId == workInfoList.firstOrNull {
+                        workInfo -> workInfo.id.toString() == app.taskId
+                    }?.id.toString()
+            }!!
+
+            workInfoList.forEach { workInfo ->
+                when (workInfo.state) {
                     WorkInfo.State.SUCCEEDED -> {
                         appEntity.status = ScheduleStatus.COMPLETED.getStatusValue()
                         // Update the app status in database
                         selectedApp = appEntity
                         updateScheduledApp(appEntity)
                     }
+
                     WorkInfo.State.FAILED -> {
                         appEntity.status = ScheduleStatus.FAILED.getStatusValue()
                         // Update the app status in database
                         selectedApp = appEntity
                         updateScheduledApp(appEntity)
                     }
+
                     WorkInfo.State.BLOCKED -> {
                         appEntity.status = ScheduleStatus.BLOCKED.getStatusValue()
                         // Update the app status in database
                         selectedApp = appEntity
                         updateScheduledApp(appEntity)
                     }
+
                     WorkInfo.State.CANCELLED -> {
                         appEntity.status = ScheduleStatus.CANCELLED.getStatusValue()
                         // Update the app status in database
@@ -108,7 +132,15 @@ class AppSchedulerViewModel @Inject constructor(
                         updateScheduledApp(appEntity)
                     }
 
-                    WorkInfo.State.ENQUEUED -> {}
+                    WorkInfo.State.ENQUEUED -> {
+                        appEntity.status = (
+                                if((appEntity.status ?: 0) == ScheduleStatus.CANCELLED.getStatusValue()
+                                ) ScheduleStatus.RESCHEDULED.getStatusValue() else ScheduleStatus.SCHEDULED.getStatusValue()
+                                )
+                        // Update the app status in database
+                        selectedApp = appEntity
+                        updateScheduledApp(appEntity)
+                    }
                     WorkInfo.State.RUNNING -> {
                         appEntity.status = ScheduleStatus.RUNNING.getStatusValue()
                         // Update the app status in database
@@ -120,15 +152,17 @@ class AppSchedulerViewModel @Inject constructor(
         }
     }
 
-    fun observeTaskStatus(
-        workId: String,
-        onStatusChanged: (WorkInfo.State) -> Unit
+    fun observeTasksStatus(
+        workIds: List<String>,
+        onStatusChanged: (List<WorkInfo>) -> Unit
     ) {
         val context = SchedulerApplication.getApplicationContext()
+        var workUuids = workIds.map { UUID.fromString(it) }
+
         viewModelScope.launch(dispatcherProvider.main) {
-            taskScheduler.observeWorkStatus(
+            taskScheduler.observeWorksStatus(
                 context = context,
-                workId = UUID.fromString(workId),
+                workIds = workUuids,
                 onStatusChanged = { status ->
                     onStatusChanged(status)
                 }
@@ -165,6 +199,9 @@ class AppSchedulerViewModel @Inject constructor(
         appEntity.status = ScheduleStatus.RESCHEDULED.getStatusValue()
         selectedApp = appEntity
         updateScheduledApp(appEntity)
+
+        //register observer
+        registerObserverForTaskStatus(listOf(appEntity))
     }
 
     fun deleteScheduledAppTask(appEntity: AppEntity) {
@@ -179,15 +216,41 @@ class AppSchedulerViewModel @Inject constructor(
         deleteScheduledApp(appEntity)
     }
 
-    fun getScheduledApp(scheduledTime: String) {
-        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+    fun checkAndScheduleApp(actionType: ScheduleActionType) {
+        _scheduledAppListUIState.value =
+            _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+        val scheduledTime = DateUtils.getCalendarDateToString(selectedDate!!)
 
         viewModelScope.launch(dispatcherProvider.main) {
             getAppScheduleUseCase.invoke(scheduledTime)
                 .flowOn(dispatcherProvider.io)
                 .collect { result ->
                     result.fold(
-                        { entity -> onSuccessGetAppScheduleResponse(entity) },
+                        { entity ->
+                            if (entity.data != null) {
+                                _scheduledAppListUIState.value =
+                                    _scheduledAppListUIState.value.copy(
+                                        isLoading = false,
+                                        message = "Time conflicts with another schedule, Please choose a different time",
+                                    )
+                            } else {
+                                when (actionType) {
+                                    ScheduleActionType.ADD -> addScheduleAppTask(
+                                        selectedApp!!,
+                                        selectedDate!!
+                                    )
+
+                                    ScheduleActionType.UPDATE -> updateScheduledAppTask(
+                                        selectedApp!!,
+                                        selectedDate!!
+                                    )
+
+                                    else -> {
+                                        // Nothing to do
+                                    }
+                                }
+                            }
+                        },
                         { error -> onFailedResponse(error) }
                     )
                 }
@@ -195,7 +258,8 @@ class AppSchedulerViewModel @Inject constructor(
     }
 
     fun createScheduledApp(appEntity: AppEntity) {
-        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+        _scheduledAppListUIState.value =
+            _scheduledAppListUIState.value.copy(isLoading = true, message = null)
 
         appEntity.status = ScheduleStatus.SCHEDULED.getStatusValue()
 
@@ -204,37 +268,38 @@ class AppSchedulerViewModel @Inject constructor(
                 .flowOn(dispatcherProvider.io)
                 .collect { result ->
                     result.fold(
-                        { entity -> onSuccessCreateAppScheduleListResponse(entity) },
+                        { entity -> onSuccessCreateAppScheduleResponse(entity) },
                         { error -> onFailedResponse(error) }
                     )
                 }
         }
     }
 
-fun updateScheduledApp(appEntity: AppEntity) {
-    _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+    fun updateScheduledApp(appEntity: AppEntity) {
+        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
 
-    viewModelScope.launch(dispatcherProvider.main) {
-        updateAppScheduleUseCase.invoke(appEntity)
-            .flowOn(dispatcherProvider.io)
-            .collect { result ->
-                result.fold(
-                    { entity -> onSuccessUpdateAppScheduleListResponse(entity) },
-                    { error -> onFailedResponse(error) }
-                )
-            }
+        viewModelScope.launch(dispatcherProvider.main) {
+            updateAppScheduleUseCase.invoke(appEntity)
+                .flowOn(dispatcherProvider.io)
+                .collect { result ->
+                    result.fold(
+                        { entity -> onSuccessUpdateAppScheduleResponse(entity) },
+                        { error -> onFailedResponse(error) }
+                    )
+                }
+        }
     }
-}
 
     fun deleteScheduledApp(appEntity: AppEntity) {
-        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+        _scheduledAppListUIState.value =
+            _scheduledAppListUIState.value.copy(isLoading = true, message = null)
 
         viewModelScope.launch(dispatcherProvider.main) {
             deleteAppScheduleUseCase.invoke(appEntity)
                 .flowOn(dispatcherProvider.io)
                 .collect { result ->
                     result.fold(
-                        { entity -> onSuccessDeleteAppScheduleListResponse(entity) },
+                        { entity -> onSuccessDeleteAppScheduleResponse(entity) },
                         { error -> onFailedResponse(error) }
                     )
                 }
@@ -246,11 +311,17 @@ fun updateScheduledApp(appEntity: AppEntity) {
         response.data?.let {
             _installedAppListUIState.value = _installedAppListUIState.value.copy(
                 isLoading = false,
-                message = "Got all installed app list successfully",
                 code = 200,
                 data = it
             )
+
+            showMessage(message = "Got all installed app list successfully")
         } ?: run {
+            _installedAppListUIState.value = AppListUIState(
+                isLoading = false,
+                code = 404
+            )
+
             onFailedResponse(
                 ErrorEntity.ServerError(
                     errorCode = 404,
@@ -266,10 +337,11 @@ fun updateScheduledApp(appEntity: AppEntity) {
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
-                message = "Get all scheduled app list successfully",
                 code = 200,
                 data = it
             )
+
+            showMessage(message = "Get all scheduled app list successfully")
         } ?: run {
             onFailedResponse(
                 ErrorEntity.ServerError(
@@ -280,35 +352,24 @@ fun updateScheduledApp(appEntity: AppEntity) {
         }
     }
 
-    // Handle success response for get app shedule by scheduled time
-    private fun onSuccessGetAppScheduleResponse(response: Entity<AppEntity>) {
-        if(response.data != null) {
-            _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
-                isLoading = false,
-                message = "Time conflicts with another schedule, Please choose a different time",
-            )
-        } else {
-            
-        }
-    }
-
     // Handle success and failure responses
-    private fun onSuccessCreateAppScheduleListResponse(response: Entity<Long>) {
+    private fun onSuccessCreateAppScheduleResponse(response: Entity<Long>) {
         selectedApp?.id = response.data
 
         var data = _scheduledAppListUIState.value.data.toMutableList()
         data.add(selectedApp!!)
 
         //register observer
-        registerObserverForTaskStatus(data)
+        registerObserverForTaskStatus(listOf(selectedApp!!))
 
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
-                message = "Created app schedule successfully",
                 code = 200,
                 data = data
             )
+
+            showMessage(message = "Created app schedule successfully")
         } ?: run {
             onFailedResponse(
                 ErrorEntity.ServerError(
@@ -317,14 +378,16 @@ fun updateScheduledApp(appEntity: AppEntity) {
                 )
             )
         }
+
+        selectedApp = null // clear selected app after delete
     }
 
     // Handle success update app schedule response
-    private fun onSuccessUpdateAppScheduleListResponse(response: Entity<Int>) {
+    private fun onSuccessUpdateAppScheduleResponse(response: Entity<Int>) {
         var data = _scheduledAppListUIState.value.data.toMutableList()
         var index = data.indexOfFirst { it.id == selectedApp?.id }
 
-        if(index != -1) {
+        if (index != -1) {
             data[index] = selectedApp!!
 
             data = data.map {
@@ -347,16 +410,14 @@ fun updateScheduledApp(appEntity: AppEntity) {
             }.toMutableList()
         }
 
-        //register observer
-        registerObserverForTaskStatus(data)
-
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
-                message = "Updated app schedule successfully",
                 code = 200,
                 data = data
             )
+
+            showMessage(message = "Updated app schedule successfully")
         } ?: run {
             onFailedResponse(
                 ErrorEntity.ServerError(
@@ -366,15 +427,15 @@ fun updateScheduledApp(appEntity: AppEntity) {
             )
         }
 
-//        selectedApp = null // clear selected app after update
+        selectedApp = null // clear selected app after delete
     }
 
     // Handle success delete app schedule response
-    private fun onSuccessDeleteAppScheduleListResponse(response: Entity<Int>) {
+    private fun onSuccessDeleteAppScheduleResponse(response: Entity<Int>) {
         var data = _scheduledAppListUIState.value.data.toMutableList()
         var index = data.indexOfFirst { it.id == selectedApp?.id }
 
-        if(index != -1) {
+        if (index != -1) {
             data.removeAt(index)
 
             data = data.map {
@@ -400,10 +461,11 @@ fun updateScheduledApp(appEntity: AppEntity) {
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
-                message = "Deleted app schedule successfully",
                 code = 200,
                 data = data
             )
+
+            showMessage(message = "Deleted app schedule successfully")
         } ?: run {
             onFailedResponse(
                 ErrorEntity.ServerError(
@@ -418,29 +480,29 @@ fun updateScheduledApp(appEntity: AppEntity) {
 
     private fun onFailedResponse(error: Throwable) {
         val errorEntity = error as? ErrorEntity
+        val message = when (errorEntity) {
+            is ErrorEntity.DecodingError -> "Internal error, Contact with your admin."
+            is ErrorEntity.NotFound -> "No data found"
+            is ErrorEntity.DatabaseAccessingError -> "Database accessing error, Contact with your admin."
+            is ErrorEntity.DatabaseWritingError -> "Database writing  error, Contact with your admin."
+            is ErrorEntity.ObjectNotFoundInDatabaseError -> "Requested data not found, Contact with your admin."
+            is ErrorEntity.NotUniqueData -> "App schedule already exists with given time, Please choose a different time"
+            else -> "An unexpected error occurred. Please try again."
+        }
 
-        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
-            isLoading = false,
-            message = when (errorEntity) {
-                is ErrorEntity.DecodingError -> "Internal error, Contact with your admin."
-                is ErrorEntity.NotFound -> "No data found"
-                is ErrorEntity.DatabaseAccessingError -> "Database accessing error, Contact with your admin."
-                is ErrorEntity.DatabaseWritingError -> "Database writing  error, Contact with your admin."
-                is ErrorEntity.ObjectNotFoundInDatabaseError -> "Requested data not found, Contact with your admin."
-                is ErrorEntity.NotUniqueData -> "App schedule already exists with given time, Please choose a different time"
-                else -> "An unexpected error occurred. Please try again."
-            }
-        )
+        showMessage(message)
 
         selectedApp = null // clear selected app after error
     }
 
     fun showMessage(message: String) {
-        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(message = message)
+        _scheduledAppListUIState.value =
+            _scheduledAppListUIState.value.copy(isLoading = false, message = message)
 
         viewModelScope.launch {
             delay(1000) // import kotlinx.coroutines.delay
-            _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(message = null)
+            _scheduledAppListUIState.value =
+                _scheduledAppListUIState.value.copy(isLoading = false, message = null)
         }
     }
 }

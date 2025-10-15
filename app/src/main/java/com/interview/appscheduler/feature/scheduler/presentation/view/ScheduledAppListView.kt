@@ -44,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.interview.appscheduler.component.NoDataView
 import com.interview.appscheduler.feature.installedapp.presentation.view.DatePickerBottomSheet
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
+import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleActionType
 import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleStatus
 import com.interview.appscheduler.feature.scheduler.presentation.view.subview.AppItemView
 import com.interview.appscheduler.feature.scheduler.presentation.viewmodel.AppSchedulerViewModel
@@ -64,7 +65,7 @@ fun ScheduledAppListView(
     val scrollState = rememberScrollState()
     val appListUiState by viewModel.scheduledAppListUIState.collectAsState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(appListUiState.initialLoad) {
         viewModel.getAllScheduledAppList()
     }
 
@@ -77,7 +78,7 @@ fun ScheduledAppListView(
         }
     }
 
-    //show bottom sheet with date and time picker
+    //show bottom sheet with date and time picker to update schedule time
     if (showBottomSheet.value) {
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet.value = false },
@@ -86,7 +87,8 @@ fun ScheduledAppListView(
             DatePickerBottomSheet(
                 selectedDate = DateUtils.getCalenderDate((viewModel.selectedApp?.scheduledTime) ?: ""),
                 onSelectDateTime = { date->
-                    viewModel.updateScheduledAppTask(viewModel.selectedApp!!, date)
+                    viewModel.selectedDate = date
+                    viewModel.checkAndScheduleApp(viewModel.actionType)
                     showBottomSheet.value = false
                 }
             )
@@ -106,6 +108,7 @@ fun ScheduledAppListView(
                 actions = {
                     IconButton(
                         onClick = {
+                            viewModel.actionType = ScheduleActionType.ADD
                             coordinator.navigateToInstalledAppListView()
                         }
                     ) {
@@ -140,6 +143,7 @@ fun ScheduledAppListView(
                     showDeleteButton = true,
                     onClickEdit = {
                         if(app.status != ScheduleStatus.COMPLETED.getStatusValue()) {
+                            viewModel.actionType = ScheduleActionType.UPDATE
                             viewModel.selectedApp = app
                             showBottomSheet.value = true
                         } else {
@@ -147,6 +151,7 @@ fun ScheduledAppListView(
                         }
                     },
                     onClickDelete = {
+                        viewModel.actionType = ScheduleActionType.DELETE
                         viewModel.selectedApp = app
                         viewModel.deleteScheduledAppTask(viewModel.selectedApp!!)
                     }
@@ -163,6 +168,7 @@ fun ScheduledAppListView(
 
                 AddScheduleButton(
                     onClick = {
+                        viewModel.actionType = ScheduleActionType.ADD
                         coordinator.navigateToInstalledAppListView()
                     }
                 )

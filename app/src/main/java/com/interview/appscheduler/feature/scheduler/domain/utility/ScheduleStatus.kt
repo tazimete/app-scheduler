@@ -38,9 +38,9 @@ enum class ScheduleStatus {
             RUNNING -> Color(0xFFDD4D01) // Orange
             COMPLETED -> Color(0xFF00966E) // Green
             RESCHEDULED -> Color(0xFF2196F3) // Green
-            FAILED -> Color.Red // Red
+            FAILED -> Color(0xFF9E9E9E) // Red
             BLOCKED -> Color(0xFFFFC107) // Amber
-            CANCELLED -> Color(0xFF9E9E9E) // Grey
+            CANCELLED -> Color.Red // Grey
         }
     }
 

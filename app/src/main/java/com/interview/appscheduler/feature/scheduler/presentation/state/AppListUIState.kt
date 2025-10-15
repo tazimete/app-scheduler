@@ -4,6 +4,7 @@ import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 
 data class AppListUIState(
     val data: List<AppEntity> = emptyList<AppEntity>(),
+    val initialLoad: Boolean = false,
     val isLoading: Boolean = false,
     val isSuccess: Boolean = true,
     val message: String? = null,

@@ -23,12 +23,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePicker
@@ -42,6 +42,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,7 +64,7 @@ fun InstalledAppListView(
     modifier: Modifier = Modifier,
     viewModel: AppSchedulerViewModel = hiltViewModel<AppSchedulerViewModel>(),
     coordinator: ScheduledAppListCoordinator,
-)  {
+) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val showBottomSheet = remember { mutableStateOf(false) }
     val snackBarHostState = remember { SnackbarHostState() }
@@ -77,7 +78,7 @@ fun InstalledAppListView(
     //show snackbar for message
     LaunchedEffect(appListUiState.message) {
         appListUiState.message?.let {
-            snackBarHostState.showSnackbar(it)
+            snackBarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
         }
     }
 
@@ -89,8 +90,9 @@ fun InstalledAppListView(
         ) {
             DatePickerBottomSheet(
                 selectedDate = DateUtils.getDeviceLocalDate(),
-                onSelectDateTime = { date->
-                    viewModel.addScheduleAppTask(viewModel.selectedApp!!, date)
+                onSelectDateTime = { date ->
+                    viewModel.selectedDate = date
+                    viewModel.checkAndScheduleApp(viewModel.actionType)
                     showBottomSheet.value = false
                     coordinator.back()
                 }
@@ -111,7 +113,7 @@ fun InstalledAppListView(
         }
     ) { padding ->
 
-        if(appListUiState.isLoading) {
+        if (appListUiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -119,41 +121,42 @@ fun InstalledAppListView(
                 CircularProgressIndicator()
             }
         }
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-            ) {
-                items(appListUiState.data.count(), key = { item -> item }) { index->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.White),
-                        colors = CardColors(
-                            containerColor = Color(0xFFFFFFFF),
-                            contentColor = Color(0xFFFFFFFF),
-                            disabledContainerColor = Color(0xFFFFFFFF),
-                            disabledContentColor = Color(0xFFFFFFFF) // Replace with your desired color
-                        )
-                    ) {
-                        AppItemView(
-                            item = appListUiState.data[index],
-                            showAddButton = true,
-                            showDeleteButton = false,
-                            onClickAdd = {
-                                viewModel.selectedApp = appListUiState.data[index]
-                                showBottomSheet.value = true
-                            },
-                            onClickDelete = {
-                                // Handle delete button click
-                            }
-                        )
-                    }
+
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
+            items(appListUiState.data.count(), key = { item -> item }) { index ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White),
+                    colors = CardColors(
+                        containerColor = Color(0xFFFFFFFF),
+                        contentColor = Color(0xFFFFFFFF),
+                        disabledContainerColor = Color(0xFFFFFFFF),
+                        disabledContentColor = Color(0xFFFFFFFF) // Replace with your desired color
+                    )
+                ) {
+                    AppItemView(
+                        item = appListUiState.data[index],
+                        showAddButton = true,
+                        showDeleteButton = false,
+                        onClickAdd = {
+                            viewModel.selectedApp = appListUiState.data[index]
+                            showBottomSheet.value = true
+                        },
+                        onClickDelete = {
+                            // Handle delete button click
+                        }
+                    )
                 }
             }
+        }
 
-        if(!appListUiState.isLoading && appListUiState.data.isEmpty()) {
+        if (!appListUiState.isLoading && appListUiState.data.isEmpty()) {
             NoDataView(details = "There is no installed app available. Please installed few from google play store.")
         }
     }
@@ -186,7 +189,6 @@ fun AddToScheduleButton(
 
 @Composable
 fun DatePickerBottomSheet(selectedDate: Date? = null, onSelectDateTime: (Date) -> Unit) {
-    // Bottom sheet state
     val bottomSheetScrollState = rememberScrollState()
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate?.time ?: Date().time,
@@ -225,9 +227,12 @@ fun DatePickerBottomSheet(selectedDate: Date? = null, onSelectDateTime: (Date) -
 
             AddToScheduleButton(
                 onClick = {
-                    val selectedDateMillis = datePickerState.selectedDateMillis ?: System.currentTimeMillis()
-                    val hours = if (timePickerState.hour == 0 ) Date().hours else timePickerState.hour
-                    val minutes = if (timePickerState.minute == 0 ) Date().minutes else timePickerState.minute
+                    val selectedDateMillis =
+                        datePickerState.selectedDateMillis ?: System.currentTimeMillis()
+                    val hours =
+                        if (timePickerState.hour == 0) Date().hours else timePickerState.hour
+                    val minutes =
+                        if (timePickerState.minute == 0) Date().minutes else timePickerState.minute
 
                     val calendar = Calendar.getInstance().apply {
                         timeInMillis = selectedDateMillis

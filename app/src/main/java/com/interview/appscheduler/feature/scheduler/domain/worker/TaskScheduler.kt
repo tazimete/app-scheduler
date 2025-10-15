@@ -6,6 +6,7 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import androidx.work.WorkQuery
 import com.interview.appscheduler.core.worker.DispatcherProvider
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 import com.interview.appscheduler.library.DateUtils
@@ -71,15 +72,16 @@ class TaskScheduler  @Inject constructor(
         return uuid
     }
 
-    suspend fun observeWorkStatus(
+    suspend fun observeWorksStatus(
         context: Context,
-        workId: UUID,
-        onStatusChanged: (WorkInfo.State) -> Unit
+        workIds: List<UUID>,
+        onStatusChanged: (List<WorkInfo>) -> Unit
     ) {
-        WorkManager.getInstance(context).getWorkInfoByIdFlow(workId)
+        val workQuery = WorkQuery.fromIds(workIds)
+        WorkManager.getInstance(context).getWorkInfosFlow(workQuery)
             .flowOn(dispatcherProvider.main)
-            .collect { result ->
-                onStatusChanged(result.state)
+            .collect { workInfoList ->
+                onStatusChanged(workInfoList)
             }
     }
 }
