@@ -159,7 +159,7 @@ class AppSchedulerViewModel @Inject constructor(
         )
 
         appEntity.taskId = workRequest.id.toString()
-        appEntity.status = ScheduleStatus.SCHEDULED.getStatusValue()
+        appEntity.status = ScheduleStatus.RESCHEDULED.getStatusValue()
         selectedApp = appEntity
         updateScheduledApp(appEntity)
     }
