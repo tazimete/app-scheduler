@@ -72,16 +72,15 @@ class TaskScheduler  @Inject constructor(
         return uuid
     }
 
-    suspend fun observeWorksStatus(
+    suspend fun observeWorkStatus(
         context: Context,
-        workIds: List<UUID>,
-        onStatusChanged: (List<WorkInfo>) -> Unit
+        workId: UUID,
+        onStatusChanged: (WorkInfo) -> Unit
     ) {
-        val workQuery = WorkQuery.fromIds(workIds)
-        WorkManager.getInstance(context).getWorkInfosFlow(workQuery)
+        WorkManager.getInstance(context).getWorkInfoByIdFlow(workId)
             .flowOn(dispatcherProvider.main)
-            .collect { workInfoList ->
-                onStatusChanged(workInfoList)
+            .collect { workInfo ->
+                    onStatusChanged(workInfo)
             }
     }
 }

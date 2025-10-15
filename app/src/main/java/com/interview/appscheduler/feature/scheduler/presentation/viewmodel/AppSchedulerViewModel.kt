@@ -88,21 +88,17 @@ class AppSchedulerViewModel @Inject constructor(
         appEntities: List<AppEntity>
     ) {
         val taskIds = appEntities
-            .filter {app-> app.status != ScheduleStatus.COMPLETED.getStatusValue() }
+            .filter { app -> app.status != ScheduleStatus.COMPLETED.getStatusValue() }
             .map { it.taskId }.filter { it.isNotEmpty() }
 
-        if(taskIds.isEmpty()) return // no tasks to observe
+        if (taskIds.isEmpty()) return // no tasks to observe
 
-        observeTasksStatus(
-            taskIds
-        ) { workInfoList ->
-            val appEntity = appEntities.firstOrNull {
-                    app-> app.taskId == workInfoList.firstOrNull {
-                        workInfo -> workInfo.id.toString() == app.taskId
-                    }?.id.toString()
-            }!!
+        taskIds.forEach { taskId ->
+            observeTasksStatus(taskId) { workInfo ->
+                val appEntity = appEntities.first() { app ->
+                    app.taskId == workInfo.id.toString()
+                }
 
-            workInfoList.forEach { workInfo ->
                 when (workInfo.state) {
                     WorkInfo.State.SUCCEEDED -> {
                         appEntity.status = ScheduleStatus.COMPLETED.getStatusValue()
@@ -126,21 +122,29 @@ class AppSchedulerViewModel @Inject constructor(
                     }
 
                     WorkInfo.State.CANCELLED -> {
-                        appEntity.status = ScheduleStatus.CANCELLED.getStatusValue()
-                        // Update the app status in database
+                        appEntity.status = ScheduleStatus.RESCHEDULED.getStatusValue() //ScheduleStatus.CANCELLED.getStatusValue()
+                        // set schedule time to update in case of reschedule
+                        if( (selectedApp?.scheduledTime ?: "").isNotEmpty() ) {
+                            appEntity.scheduledTime = selectedApp?.scheduledTime
+                        }
                         selectedApp = appEntity
+                        // Update the app status in database
                         updateScheduledApp(appEntity)
                     }
 
                     WorkInfo.State.ENQUEUED -> {
                         appEntity.status = (
-                                if((appEntity.status ?: 0) == ScheduleStatus.CANCELLED.getStatusValue()
-                                ) ScheduleStatus.RESCHEDULED.getStatusValue() else ScheduleStatus.SCHEDULED.getStatusValue()
+                                if ((appEntity.status ?: -1) == ScheduleStatus.SCHEDULED.getStatusValue()
+                                )
+                                    ScheduleStatus.SCHEDULED.getStatusValue()
+                                else
+                                    ScheduleStatus.RESCHEDULED.getStatusValue()
                                 )
                         // Update the app status in database
                         selectedApp = appEntity
                         updateScheduledApp(appEntity)
                     }
+
                     WorkInfo.State.RUNNING -> {
                         appEntity.status = ScheduleStatus.RUNNING.getStatusValue()
                         // Update the app status in database
@@ -153,16 +157,16 @@ class AppSchedulerViewModel @Inject constructor(
     }
 
     fun observeTasksStatus(
-        workIds: List<String>,
-        onStatusChanged: (List<WorkInfo>) -> Unit
+        workId: String,
+        onStatusChanged: (WorkInfo) -> Unit
     ) {
         val context = SchedulerApplication.getApplicationContext()
-        var workUuids = workIds.map { UUID.fromString(it) }
+        var workUuid = UUID.fromString(workId)
 
         viewModelScope.launch(dispatcherProvider.main) {
-            taskScheduler.observeWorksStatus(
+            taskScheduler.observeWorkStatus(
                 context = context,
-                workIds = workUuids,
+                workId = workUuid,
                 onStatusChanged = { status ->
                     onStatusChanged(status)
                 }
@@ -199,9 +203,6 @@ class AppSchedulerViewModel @Inject constructor(
         appEntity.status = ScheduleStatus.RESCHEDULED.getStatusValue()
         selectedApp = appEntity
         updateScheduledApp(appEntity)
-
-        //register observer
-        registerObserverForTaskStatus(listOf(appEntity))
     }
 
     fun deleteScheduledAppTask(appEntity: AppEntity) {
@@ -276,7 +277,8 @@ class AppSchedulerViewModel @Inject constructor(
     }
 
     fun updateScheduledApp(appEntity: AppEntity) {
-        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+        _scheduledAppListUIState.value =
+            _scheduledAppListUIState.value.copy(isLoading = true, message = null)
 
         viewModelScope.launch(dispatcherProvider.main) {
             updateAppScheduleUseCase.invoke(appEntity)
@@ -359,13 +361,31 @@ class AppSchedulerViewModel @Inject constructor(
         var data = _scheduledAppListUIState.value.data.toMutableList()
         data.add(selectedApp!!)
 
+        data = data.map {
+            AppEntity(
+                id = it.id,
+                appId = it.appId,
+                taskId = it.taskId,
+                name = it.name,
+                packageName = it.packageName,
+                icon = it.icon,
+                versionCode = it.versionCode,
+                versionName = it.versionName,
+                isSystemApp = it.isSystemApp,
+                thumbnail = it.thumbnail,
+                isScheduled = it.isScheduled,
+                scheduledTime = it.scheduledTime,
+                installedTime = it.installedTime,
+                status = it.status,
+            )
+        }.toMutableList()
+
         //register observer
         registerObserverForTaskStatus(listOf(selectedApp!!))
 
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
-                code = 200,
                 data = data
             )
 
@@ -378,8 +398,6 @@ class AppSchedulerViewModel @Inject constructor(
                 )
             )
         }
-
-        selectedApp = null // clear selected app after delete
     }
 
     // Handle success update app schedule response
@@ -426,8 +444,6 @@ class AppSchedulerViewModel @Inject constructor(
                 )
             )
         }
-
-        selectedApp = null // clear selected app after delete
     }
 
     // Handle success delete app schedule response
@@ -461,7 +477,6 @@ class AppSchedulerViewModel @Inject constructor(
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
-                code = 200,
                 data = data
             )
 
@@ -474,8 +489,6 @@ class AppSchedulerViewModel @Inject constructor(
                 )
             )
         }
-
-        selectedApp = null // clear selected app after delete
     }
 
     private fun onFailedResponse(error: Throwable) {

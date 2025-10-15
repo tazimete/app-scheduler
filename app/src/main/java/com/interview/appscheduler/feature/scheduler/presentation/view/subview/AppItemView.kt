@@ -139,7 +139,7 @@ fun AppItemView(
                             .height(28.dp)
                             .background(Color.Transparent)
                             .border(
-                                width = 0.3.dp,
+                                width = 0.5.dp,
                                 color = Color(0xFF00966E),
                                 shape = RoundedCornerShape(4.dp)
                             ),
@@ -159,7 +159,7 @@ fun AppItemView(
                             .height(28.dp)
                             .background(Color.Transparent)
                             .border(
-                                width = 0.3.dp,
+                                width = 0.5.dp,
                                 color = Color.Red.copy(alpha = 0.8f),
                                 shape = RoundedCornerShape(4.dp)
                             ),
