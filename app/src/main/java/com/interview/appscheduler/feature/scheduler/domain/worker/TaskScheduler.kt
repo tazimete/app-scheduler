@@ -6,7 +6,6 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.WorkQuery
 import com.interview.appscheduler.core.worker.DispatcherProvider
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 import com.interview.appscheduler.library.DateUtils

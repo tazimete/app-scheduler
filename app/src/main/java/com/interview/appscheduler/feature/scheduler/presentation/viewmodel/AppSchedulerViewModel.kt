@@ -361,28 +361,6 @@ class AppSchedulerViewModel @Inject constructor(
         var data = _scheduledAppListUIState.value.data.toMutableList()
         data.add(selectedApp!!)
 
-        data = data.map {
-            AppEntity(
-                id = it.id,
-                appId = it.appId,
-                taskId = it.taskId,
-                name = it.name,
-                packageName = it.packageName,
-                icon = it.icon,
-                versionCode = it.versionCode,
-                versionName = it.versionName,
-                isSystemApp = it.isSystemApp,
-                thumbnail = it.thumbnail,
-                isScheduled = it.isScheduled,
-                scheduledTime = it.scheduledTime,
-                installedTime = it.installedTime,
-                status = it.status,
-            )
-        }.toMutableList()
-
-        //register observer
-        registerObserverForTaskStatus(listOf(selectedApp!!))
-
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
@@ -398,6 +376,9 @@ class AppSchedulerViewModel @Inject constructor(
                 )
             )
         }
+
+        //register observer
+        registerObserverForTaskStatus(listOf(selectedApp!!))
     }
 
     // Handle success update app schedule response
@@ -431,7 +412,6 @@ class AppSchedulerViewModel @Inject constructor(
         response.data?.let {
             _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(
                 isLoading = false,
-                code = 200,
                 data = data
             )
 
