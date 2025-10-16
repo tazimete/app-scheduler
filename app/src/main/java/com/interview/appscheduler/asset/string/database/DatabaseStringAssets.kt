@@ -10,7 +10,7 @@ enum class DatabaseStringAssets(override val value: String): StringResource {
     WRITE_FAILED("Failed to write record to database"),
     UPDATE_FAILED("Failed to update record to database"),
     DELETE_FAILED("Failed to delete record to database"),
-    TIME_CONFLICTS("Time conflicts with existing records"),
+    TIME_CONFLICTS("Time conflicts with other app schedule. Please choose a different time."),
     TIMEOUT("Database timeout"),
     NOT_FOUND("Record not found"),
     UNKNOWN("Unknown database error"),
