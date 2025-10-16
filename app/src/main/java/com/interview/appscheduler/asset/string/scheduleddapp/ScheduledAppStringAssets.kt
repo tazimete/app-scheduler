@@ -32,4 +32,5 @@ enum class ScheduledAppStringAssets(override val value: String): StringResource 
 
     //App Scheduler View
     NO_SCHEDULED_APPS_AVAILABLE("There is no scheduled app available. Please add a schedule."),
+    SCHEDULE_COMPLETED_AND_CANT_EDIT("This app schedule is already completed and cannot be edited."),
 }

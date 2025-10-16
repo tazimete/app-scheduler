@@ -149,7 +149,7 @@ fun ScheduledAppListView(
                             viewModel.selectedApp = app
                             showBottomSheet.value = true
                         } else {
-                            viewModel.showMessage("This app schedule is already completed and cannot be edited.")
+                            viewModel.showMessage(ScheduledAppStringAssets.SCHEDULE_COMPLETED_AND_CANT_EDIT.value)
                         }
                     },
                     onClickDelete = {

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import com.interview.appscheduler.application.SchedulerApplication
+import com.interview.appscheduler.asset.string.installedapp.InstalledAppStringAssets
 import com.interview.appscheduler.asset.string.scheduleddapp.ScheduledAppStringAssets
 import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
@@ -315,7 +316,7 @@ class AppSchedulerViewModel @Inject constructor(
                 data = it
             )
 
-            showMessage(message = ScheduledAppStringAssets.GET_ALL_INSTALLED_APPS.value)
+            showMessage(message = InstalledAppStringAssets.GET_ALL_INSTALLED_APPS.value)
         } ?: run {
             _installedAppListUIState.value = AppListUIState(
                 isLoading = false,
