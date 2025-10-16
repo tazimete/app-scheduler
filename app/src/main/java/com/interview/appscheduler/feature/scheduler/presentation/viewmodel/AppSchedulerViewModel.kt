@@ -11,6 +11,7 @@ import com.interview.appscheduler.core.domain.exception.DatabaseError
 import com.interview.appscheduler.core.worker.DispatcherProvider
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
+import com.interview.appscheduler.feature.scheduler.domain.usecase.CheckTimeConflictForAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.CreateAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.DeleteAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.GetAllInstalledAppListUseCase
@@ -36,6 +37,7 @@ import javax.inject.Inject
 class AppSchedulerViewModel @Inject constructor(
     private val getAllInstalledAppListUseCase: GetAllInstalledAppListUseCase,
     private val getAllScheduledAppListUseCase: GetAllScheduledAppListUseCase,
+    private val checkTimeConflictForAppScheduleUseCase: CheckTimeConflictForAppScheduleUseCase,
     private val getAppScheduleUseCase: GetAppScheduleUseCase,
     private val createAppScheduleUseCase: CreateAppScheduleUseCase,
     private val updateAppScheduleUseCase: UpdateAppScheduleUseCase,
@@ -223,17 +225,16 @@ class AppSchedulerViewModel @Inject constructor(
     }
 
     fun checkAndScheduleApp(actionType: ScheduleActionType) {
-        _scheduledAppListUIState.value =
-            _scheduledAppListUIState.value.copy(isLoading = true, message = null)
+        _scheduledAppListUIState.value = _scheduledAppListUIState.value.copy(isLoading = true, message = null)
         val scheduledTime = DateUtils.getCalendarDateToString(selectedDate!!)
 
         viewModelScope.launch(dispatcherProvider.main) {
-            getAppScheduleUseCase.invoke(scheduledTime)
+            checkTimeConflictForAppScheduleUseCase.invoke(scheduledTime)
                 .flowOn(dispatcherProvider.io)
                 .collect { result ->
                     result.fold(
-                        { entity ->
-                            if (entity.data != null) {
+                        { hasConflict ->
+                            if (hasConflict.data == true) {
                                 onFailedResponse(DatabaseError.TimeConflicts)
                             } else {
                                 when (actionType) {
