@@ -6,8 +6,8 @@ import androidx.work.WorkInfo
 import com.interview.appscheduler.application.SchedulerApplication
 import com.interview.appscheduler.asset.string.installedapp.InstalledAppStringAssets
 import com.interview.appscheduler.asset.string.scheduleddapp.ScheduledAppStringAssets
-import com.interview.appscheduler.core.domain.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
+import com.interview.appscheduler.core.domain.exception.DatabaseError
 import com.interview.appscheduler.core.worker.DispatcherProvider
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
@@ -234,11 +234,7 @@ class AppSchedulerViewModel @Inject constructor(
                     result.fold(
                         { entity ->
                             if (entity.data != null) {
-                                _scheduledAppListUIState.value =
-                                    _scheduledAppListUIState.value.copy(
-                                        isLoading = false,
-                                        message = ScheduledAppStringAssets.TIME_CONFLICTS_WITH_ANOTHER_SCHEDULE.value,
-                                    )
+                                onFailedResponse(DatabaseError.TimeConflicts)
                             } else {
                                 when (actionType) {
                                     ScheduleActionType.ADD -> addScheduleAppTask(selectedApp!!, selectedDate!!)
@@ -323,12 +319,7 @@ class AppSchedulerViewModel @Inject constructor(
                 code = 404
             )
 
-            onFailedResponse(
-                ErrorEntity.ServerError(
-                    errorCode = 404,
-                    errorMessage = ScheduledAppStringAssets.NO_DATA_FOUND.value
-                )
-            )
+            onFailedResponse(DatabaseError.NotFound)
         }
     }
 
@@ -344,12 +335,7 @@ class AppSchedulerViewModel @Inject constructor(
 
             showMessage(message = ScheduledAppStringAssets.GET_ALL_APP_SCHEDULES.value)
         } ?: run {
-            onFailedResponse(
-                ErrorEntity.ServerError(
-                    errorCode = 404,
-                    errorMessage = ScheduledAppStringAssets.NO_DATA_FOUND.value
-                )
-            )
+            onFailedResponse(DatabaseError.NotFound)
         }
     }
 
@@ -368,12 +354,7 @@ class AppSchedulerViewModel @Inject constructor(
 
             showMessage(message = ScheduledAppStringAssets.CREATE_APP_SCHEDULE.value)
         } ?: run {
-            onFailedResponse(
-                ErrorEntity.ServerError(
-                    errorCode = 404,
-                    errorMessage = ScheduledAppStringAssets.NO_DATA_FOUND.value
-                )
-            )
+            onFailedResponse(DatabaseError.WriteError)
         }
 
         //register observer
@@ -419,12 +400,7 @@ class AppSchedulerViewModel @Inject constructor(
 
             showMessage(message = ScheduledAppStringAssets.UPDATE_APP_SCHEDULE.value)
         } ?: run {
-            onFailedResponse(
-                ErrorEntity.ServerError(
-                    errorCode = 404,
-                    errorMessage = ScheduledAppStringAssets.NO_DATA_FOUND.value
-                )
-            )
+            onFailedResponse(DatabaseError.UpdateError)
         }
     }
 
@@ -464,28 +440,12 @@ class AppSchedulerViewModel @Inject constructor(
 
             showMessage(message = ScheduledAppStringAssets.DELETE_APP_SCHEDULE.value)
         } ?: run {
-            onFailedResponse(
-                ErrorEntity.ServerError(
-                    errorCode = 404,
-                    errorMessage = ScheduledAppStringAssets.NO_DATA_FOUND.value
-                )
-            )
+            onFailedResponse(DatabaseError.DeleteError)
         }
     }
 
     private fun onFailedResponse(error: Throwable) {
-        val errorEntity = error as? ErrorEntity
-        val message = when (errorEntity) {
-            is ErrorEntity.DecodingError -> ScheduledAppStringAssets.DECODING_ERROR.value
-            is ErrorEntity.NotFound -> ScheduledAppStringAssets.NO_DATA_FOUND.value
-            is ErrorEntity.DatabaseAccessingError -> ScheduledAppStringAssets.DATABASE_ACCESS_ERROR.value
-            is ErrorEntity.DatabaseWritingError -> ScheduledAppStringAssets.DATABASE_WRITE_ERROR.value
-            is ErrorEntity.ObjectNotFoundInDatabaseError -> ScheduledAppStringAssets.DATABASE_OBJECT_NOT_FOUND_ERROR.value
-            is ErrorEntity.NotUniqueData -> ScheduledAppStringAssets.TIME_CONFLICTS_WITH_ANOTHER_SCHEDULE.value
-            else -> ScheduledAppStringAssets.UNEXPECTED_ERROR.value
-        }
-
-        showMessage(message)
+        showMessage(error.message ?: ScheduledAppStringAssets.FAILED_TO_PROCESS_REQUEST.value)
 
         selectedApp = null // clear selected app after error
     }

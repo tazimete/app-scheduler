@@ -2,8 +2,8 @@ package com.interview.appscheduler.feature.scheduler.data.source.local
 
 import com.interview.appscheduler.asset.string.scheduleddapp.ScheduledAppStringAssets
 import com.interview.appscheduler.core.data.Response
-import com.interview.appscheduler.core.data.db.exception.DatabaseError
-import com.interview.appscheduler.core.data.db.exception.abstraction.AbstractDatabaseErrorMapper
+import com.interview.appscheduler.core.domain.exception.DatabaseError
+import com.interview.appscheduler.core.domain.exception.abstraction.AbstractDatabaseErrorMapper
 import com.interview.appscheduler.feature.scheduler.data.entity.AppSchedulerTableEntity
 import com.interview.appscheduler.feature.scheduler.data.source.local.service.AppSchedulerDao
 import kotlinx.coroutines.flow.Flow

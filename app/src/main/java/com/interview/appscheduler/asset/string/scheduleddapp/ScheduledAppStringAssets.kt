@@ -22,6 +22,7 @@ enum class ScheduledAppStringAssets(override val value: String): StringResource 
     //App Scheduler ViewModel
     TIME_CONFLICTS_WITH_ANOTHER_SCHEDULE("Time conflicts with another schedule, Please choose a different time"),
     NO_DATA_FOUND("No data found"),
+    FAILED_TO_PROCESS_REQUEST("Failed to process request. Please try again."),
 
     //Exception Messages
     DECODING_ERROR("Decoding error, Failed to decode your data"),
@@ -33,4 +34,5 @@ enum class ScheduledAppStringAssets(override val value: String): StringResource 
     //App Scheduler View
     NO_SCHEDULED_APPS_AVAILABLE("There is no scheduled app available. Please add a schedule."),
     SCHEDULE_COMPLETED_AND_CANT_EDIT("This app schedule is already completed and cannot be edited."),
+
 }
