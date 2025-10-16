@@ -6,7 +6,7 @@ import androidx.work.WorkInfo
 import com.interview.appscheduler.application.SchedulerApplication
 import com.interview.appscheduler.asset.string.installedapp.InstalledAppStringAssets
 import com.interview.appscheduler.asset.string.scheduleddapp.ScheduledAppStringAssets
-import com.interview.appscheduler.core.Exception.ErrorEntity
+import com.interview.appscheduler.core.domain.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
 import com.interview.appscheduler.core.worker.DispatcherProvider
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator

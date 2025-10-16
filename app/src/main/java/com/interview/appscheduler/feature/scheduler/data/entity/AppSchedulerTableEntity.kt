@@ -2,8 +2,7 @@ package com.interview.appscheduler.feature.scheduler.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.gson.annotations.SerializedName
-import com.interview.appscheduler.core.db.BaseEntity
+import com.interview.appscheduler.core.data.db.BaseEntity
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 
 @Entity(tableName = "app_scheduler_table")

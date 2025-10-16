@@ -1,4 +1,4 @@
-package com.interview.appscheduler.core.Exception
+package com.interview.appscheduler.core.domain.Exception
 
 sealed class ErrorEntity (
     var code: Int = 0,

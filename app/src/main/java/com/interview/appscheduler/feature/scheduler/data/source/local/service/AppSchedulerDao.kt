@@ -3,8 +3,8 @@ package com.interview.appscheduler.feature.scheduler.data.source.local.service
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RoomDatabase
-import com.interview.appscheduler.core.db.BaseDao
-import com.interview.appscheduler.core.db.RoomDBEntities
+import com.interview.appscheduler.core.data.db.BaseDao
+import com.interview.appscheduler.core.data.db.RoomDBEntities
 import com.interview.appscheduler.feature.scheduler.data.entity.AppSchedulerTableEntity
 
 @Dao

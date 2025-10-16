@@ -2,8 +2,8 @@ package com.interview.appscheduler.core.di
 
 import android.content.Context
 import androidx.room.Room
-import com.interview.appscheduler.core.db.AppDatabase
-import com.interview.appscheduler.core.db.RoomDBEntities
+import com.interview.appscheduler.core.data.db.AppDatabase
+import com.interview.appscheduler.core.data.db.RoomDBEntities
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

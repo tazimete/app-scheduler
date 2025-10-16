@@ -1,4 +1,4 @@
-package com.interview.appscheduler.core.db
+package com.interview.appscheduler.core.data.db
 
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
