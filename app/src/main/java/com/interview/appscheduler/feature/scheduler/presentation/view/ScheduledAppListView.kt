@@ -42,11 +42,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.interview.appscheduler.component.NoDataView
-import com.interview.appscheduler.feature.installedapp.presentation.view.DatePickerBottomSheet
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleActionType
 import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleStatus
 import com.interview.appscheduler.feature.scheduler.presentation.view.subview.AppItemView
+import com.interview.appscheduler.feature.scheduler.presentation.view.subview.DatePickerBottomSheet
 import com.interview.appscheduler.feature.scheduler.presentation.viewmodel.AppSchedulerViewModel
 import com.interview.appscheduler.library.DateUtils
 import kotlinx.coroutines.launch
@@ -64,6 +64,7 @@ fun ScheduledAppListView(
     val snackBarScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val appListUiState by viewModel.scheduledAppListUIState.collectAsState()
+    viewModel.coordinator = coordinator
 
     LaunchedEffect(appListUiState.initialLoad) {
         viewModel.getAllScheduledAppList()
@@ -101,7 +102,7 @@ fun ScheduledAppListView(
             TopAppBar(
                 title = { Text("Scheduled Apps (${appListUiState.data.count()})") },
                 navigationIcon = {
-                    IconButton(onClick = {  }) {
+                    IconButton(onClick = { }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -109,7 +110,7 @@ fun ScheduledAppListView(
                     IconButton(
                         onClick = {
                             viewModel.actionType = ScheduleActionType.ADD
-                            coordinator.navigateToInstalledAppListView()
+                            viewModel.coordinator?.navigateToInstalledAppListView()
                         }
                     ) {
                         Icon(
@@ -169,7 +170,7 @@ fun ScheduledAppListView(
                 AddScheduleButton(
                     onClick = {
                         viewModel.actionType = ScheduleActionType.ADD
-                        coordinator.navigateToInstalledAppListView()
+                        viewModel.coordinator?.navigateToInstalledAppListView()
                     }
                 )
 

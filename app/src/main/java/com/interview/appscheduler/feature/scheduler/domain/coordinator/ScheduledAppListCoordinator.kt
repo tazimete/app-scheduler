@@ -19,6 +19,10 @@ class ScheduledAppListCoordinator: Coordinator {
         navController.navigate(NavigationItem.InstalledAppList.route)
     }
 
+    fun navigateToScheduledAppListView() {
+        navController.navigate(NavigationItem.ScheduledAppList.route)
+    }
+
     fun  navigateToScreen(navController: NavController, screen: String) {
         navController.navigate(screen)
     }

@@ -79,7 +79,9 @@ class TaskScheduler  @Inject constructor(
         WorkManager.getInstance(context).getWorkInfoByIdFlow(workId)
             .flowOn(dispatcherProvider.main)
             .collect { workInfo ->
+                if(workInfo != null) {
                     onStatusChanged(workInfo)
+                }
             }
     }
 }

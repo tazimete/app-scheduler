@@ -8,6 +8,7 @@ import com.interview.appscheduler.asset.string.StringAssets
 import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
 import com.interview.appscheduler.core.worker.DispatcherProvider
+import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.domain.entity.AppEntity
 import com.interview.appscheduler.feature.scheduler.domain.usecase.CreateAppScheduleUseCase
 import com.interview.appscheduler.feature.scheduler.domain.usecase.DeleteAppScheduleUseCase
@@ -41,6 +42,8 @@ class AppSchedulerViewModel @Inject constructor(
     private val taskScheduler: TaskScheduler,
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
+    public var coordinator: ScheduledAppListCoordinator? = null
+
     private val _scheduledAppListUIState =
         MutableStateFlow(AppListUIState(initialLoad = true, isLoading = true))
     val scheduledAppListUIState = _scheduledAppListUIState.asStateFlow()
@@ -237,15 +240,9 @@ class AppSchedulerViewModel @Inject constructor(
                                     )
                             } else {
                                 when (actionType) {
-                                    ScheduleActionType.ADD -> addScheduleAppTask(
-                                        selectedApp!!,
-                                        selectedDate!!
-                                    )
+                                    ScheduleActionType.ADD -> addScheduleAppTask(selectedApp!!, selectedDate!!)
 
-                                    ScheduleActionType.UPDATE -> updateScheduledAppTask(
-                                        selectedApp!!,
-                                        selectedDate!!
-                                    )
+                                    ScheduleActionType.UPDATE -> updateScheduledAppTask(selectedApp!!, selectedDate!!)
 
                                     else -> {
                                         // Nothing to do
@@ -380,6 +377,9 @@ class AppSchedulerViewModel @Inject constructor(
 
         //register observer
         registerObserverForTaskStatus(listOf(selectedApp!!))
+
+        //navigate back to scheduled app list view
+        coordinator?.back()
     }
 
     // Handle success update app schedule response
