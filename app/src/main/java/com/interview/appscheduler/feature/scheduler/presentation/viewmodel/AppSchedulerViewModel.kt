@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import com.interview.appscheduler.application.SchedulerApplication
+import com.interview.appscheduler.asset.string.StringAssets
 import com.interview.appscheduler.core.Exception.ErrorEntity
 import com.interview.appscheduler.core.domain.Entity
 import com.interview.appscheduler.core.worker.DispatcherProvider
@@ -232,7 +233,7 @@ class AppSchedulerViewModel @Inject constructor(
                                 _scheduledAppListUIState.value =
                                     _scheduledAppListUIState.value.copy(
                                         isLoading = false,
-                                        message = "Time conflicts with another schedule, Please choose a different time",
+                                        message = StringAssets.TIME_CONFLICTS_WITH_ANOTHER_SCHEDULE.value,
                                     )
                             } else {
                                 when (actionType) {
@@ -317,7 +318,7 @@ class AppSchedulerViewModel @Inject constructor(
                 data = it
             )
 
-            showMessage(message = "Got all installed app list successfully")
+            showMessage(message = StringAssets.GET_ALL_INSTALLED_APPS.value)
         } ?: run {
             _installedAppListUIState.value = AppListUIState(
                 isLoading = false,
@@ -327,7 +328,7 @@ class AppSchedulerViewModel @Inject constructor(
             onFailedResponse(
                 ErrorEntity.ServerError(
                     errorCode = 404,
-                    errorMessage = "No data found"
+                    errorMessage = StringAssets.NO_DATA_FOUND.value
                 )
             )
         }
@@ -343,12 +344,12 @@ class AppSchedulerViewModel @Inject constructor(
                 data = it
             )
 
-            showMessage(message = "Get all scheduled app list successfully")
+            showMessage(message = StringAssets.GET_ALL_APP_SCHEDULES.value)
         } ?: run {
             onFailedResponse(
                 ErrorEntity.ServerError(
                     errorCode = 404,
-                    errorMessage = "No data found"
+                    errorMessage = StringAssets.NO_DATA_FOUND.value
                 )
             )
         }
@@ -367,12 +368,12 @@ class AppSchedulerViewModel @Inject constructor(
                 data = data
             )
 
-            showMessage(message = "Created app schedule successfully")
+            showMessage(message = StringAssets.CREATE_APP_SCHEDULE.value)
         } ?: run {
             onFailedResponse(
                 ErrorEntity.ServerError(
                     errorCode = 404,
-                    errorMessage = "No data found"
+                    errorMessage = StringAssets.NO_DATA_FOUND.value
                 )
             )
         }
@@ -415,12 +416,12 @@ class AppSchedulerViewModel @Inject constructor(
                 data = data
             )
 
-            showMessage(message = "Updated app schedule successfully")
+            showMessage(message = StringAssets.UPDATE_APP_SCHEDULE.value)
         } ?: run {
             onFailedResponse(
                 ErrorEntity.ServerError(
                     errorCode = 404,
-                    errorMessage = "No data found"
+                    errorMessage = StringAssets.NO_DATA_FOUND.value
                 )
             )
         }
@@ -460,12 +461,12 @@ class AppSchedulerViewModel @Inject constructor(
                 data = data
             )
 
-            showMessage(message = "Deleted app schedule successfully")
+            showMessage(message = StringAssets.DELETE_APP_SCHEDULE.value)
         } ?: run {
             onFailedResponse(
                 ErrorEntity.ServerError(
                     errorCode = 404,
-                    errorMessage = "No data found"
+                    errorMessage = StringAssets.NO_DATA_FOUND.value
                 )
             )
         }
@@ -474,13 +475,13 @@ class AppSchedulerViewModel @Inject constructor(
     private fun onFailedResponse(error: Throwable) {
         val errorEntity = error as? ErrorEntity
         val message = when (errorEntity) {
-            is ErrorEntity.DecodingError -> "Internal error, Contact with your admin."
-            is ErrorEntity.NotFound -> "No data found"
-            is ErrorEntity.DatabaseAccessingError -> "Database accessing error, Contact with your admin."
-            is ErrorEntity.DatabaseWritingError -> "Database writing  error, Contact with your admin."
-            is ErrorEntity.ObjectNotFoundInDatabaseError -> "Requested data not found, Contact with your admin."
-            is ErrorEntity.NotUniqueData -> "App schedule already exists with given time, Please choose a different time"
-            else -> "An unexpected error occurred. Please try again."
+            is ErrorEntity.DecodingError -> StringAssets.DECODING_ERROR.value
+            is ErrorEntity.NotFound -> StringAssets.NO_DATA_FOUND.value
+            is ErrorEntity.DatabaseAccessingError -> StringAssets.DATABASE_ACCESS_ERROR.value
+            is ErrorEntity.DatabaseWritingError -> StringAssets.DATABASE_WRITE_ERROR.value
+            is ErrorEntity.ObjectNotFoundInDatabaseError -> StringAssets.DATABASE_OBJECT_NOT_FOUND_ERROR.value
+            is ErrorEntity.NotUniqueData -> StringAssets.TIME_CONFLICTS_WITH_ANOTHER_SCHEDULE.value
+            else -> StringAssets.UNEXPECTED_ERROR.value
         }
 
         showMessage(message)

@@ -2,11 +2,11 @@ package com.interview.appscheduler.asset.string
 
 enum class StringAssets(override val value: String): StringResource {
     // App Scheduler Repository
-    GET_ALL_INSTALLED_APPS("Get all installed app scheduler successfully"),
+    GET_ALL_INSTALLED_APPS("Got all installed apps successfully"),
     FAILED_TO_GET_ALL_INSTALLED_APPS("Failed to load installed app scheduler from os"),
 
     // App Scheduler Local Data Source
-    GET_ALL_APP_SCHEDULES("Get all app scheduler successfully"),
+    GET_ALL_APP_SCHEDULES("Got all app scheduler successfully"),
     FAILED_TO_GET_ALL_APP_SCHEDULES("Get all app scheduler successfully"),
 
     GET_SCHEDULED_APP("Get app schedule successfully"),
@@ -20,4 +20,15 @@ enum class StringAssets(override val value: String): StringResource {
 
     DELETE_APP_SCHEDULE("Deleted app schedule successfully"),
     FAILED_TO_DELETE_APP_SCHEDULE("Failed to delete app schedule"),
+
+    //App Scheduler ViewModel
+    TIME_CONFLICTS_WITH_ANOTHER_SCHEDULE("Time conflicts with another schedule, Please choose a different time"),
+    NO_DATA_FOUND("No data found"),
+
+    //Exception Messages
+    DECODING_ERROR("Decoding error, Failed to decode your data"),
+    DATABASE_ACCESS_ERROR("Database accessing error, Contact with your admin."),
+    DATABASE_WRITE_ERROR("Database writing  error, Contact with your admin."),
+    DATABASE_OBJECT_NOT_FOUND_ERROR("Requested data not found, Contact with your admin."),
+    UNEXPECTED_ERROR("An unexpected error occurred. Please try again."),
 }
