@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.interview.appscheduler.asset.string.scheduleddapp.ScheduledAppStringAssets
 import com.interview.appscheduler.component.NoDataView
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.domain.utility.ScheduleActionType
@@ -161,7 +162,7 @@ fun ScheduledAppListView(
 
             // show no data view
             if (!appListUiState.isLoading && appListUiState.data.isEmpty()) {
-                NoDataView(details = "There is no scheduled app available. Please add a schedule.")
+                NoDataView(details = ScheduledAppStringAssets.NO_SCHEDULED_APPS_AVAILABLE.value)
             }
 
             if (!appListUiState.isLoading ) {

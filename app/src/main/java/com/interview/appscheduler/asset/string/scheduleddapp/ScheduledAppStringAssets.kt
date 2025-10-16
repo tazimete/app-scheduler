@@ -1,10 +1,8 @@
-package com.interview.appscheduler.asset.string
+package com.interview.appscheduler.asset.string.scheduleddapp
 
-enum class StringAssets(override val value: String): StringResource {
-    // App Scheduler Repository
-    GET_ALL_INSTALLED_APPS("Got all installed apps successfully"),
-    FAILED_TO_GET_ALL_INSTALLED_APPS("Failed to load installed app scheduler from os"),
+import com.interview.appscheduler.asset.string.abstraction.StringResource
 
+enum class ScheduledAppStringAssets(override val value: String): StringResource {
     // App Scheduler Local Data Source
     GET_ALL_APP_SCHEDULES("Got all app scheduler successfully"),
     FAILED_TO_GET_ALL_APP_SCHEDULES("Get all app scheduler successfully"),
@@ -31,4 +29,7 @@ enum class StringAssets(override val value: String): StringResource {
     DATABASE_WRITE_ERROR("Database writing  error, Contact with your admin."),
     DATABASE_OBJECT_NOT_FOUND_ERROR("Requested data not found, Contact with your admin."),
     UNEXPECTED_ERROR("An unexpected error occurred. Please try again."),
+
+    //App Scheduler View
+    NO_SCHEDULED_APPS_AVAILABLE("There is no scheduled app available. Please add a schedule."),
 }

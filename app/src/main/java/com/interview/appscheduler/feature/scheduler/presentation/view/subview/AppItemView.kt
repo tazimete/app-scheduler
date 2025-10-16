@@ -45,9 +45,9 @@ fun AppItemView(
     showAddButton: Boolean = false,
     showEditButton: Boolean = false,
     showDeleteButton: Boolean = false,
-    onClickAdd: () -> Unit = {},
-    onClickEdit: () -> Unit = {},
-    onClickDelete: () -> Unit = {}
+    onClickAdd: (() -> Unit)? = null,
+    onClickEdit: (() -> Unit)? = null,
+    onClickDelete: (() -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -113,7 +113,7 @@ fun AppItemView(
             // Add Button
             if(showAddButton) {
                 OutlinedButton(
-                    onClick = onClickAdd,
+                    onClick = onClickAdd.let { it!! },
                     shape = CircleShape,
                     border = BorderStroke(1.dp, Color(0xFF00966E)),
                     contentPadding = PaddingValues(0.dp),
@@ -132,7 +132,7 @@ fun AppItemView(
 
             // Edit Button
             if(showEditButton) {
-                IconButton(onClick = onClickEdit) {
+                IconButton(onClick = onClickEdit.let { it!! }) {
                     Icon(
                         modifier = Modifier
                             .width(28.dp)
@@ -152,7 +152,7 @@ fun AppItemView(
 
             // Delete Button
             if(showDeleteButton) {
-                IconButton(onClick = onClickDelete) {
+                IconButton(onClick = onClickDelete.let { it!! }) {
                     Icon(
                         modifier = Modifier
                             .width(28.dp)

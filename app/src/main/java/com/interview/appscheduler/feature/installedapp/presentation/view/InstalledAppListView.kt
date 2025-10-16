@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.interview.appscheduler.asset.string.installedapp.InstalledAppStringAssets
 import com.interview.appscheduler.component.NoDataView
 import com.interview.appscheduler.feature.scheduler.domain.coordinator.ScheduledAppListCoordinator
 import com.interview.appscheduler.feature.scheduler.presentation.view.subview.AppItemView
@@ -148,16 +149,13 @@ fun InstalledAppListView(
                             viewModel.selectedApp = installedAppListUIState.data[index]
                             showBottomSheet.value = true
                         },
-                        onClickDelete = {
-                            // Handle delete button click
-                        }
                     )
                 }
             }
         }
 
         if (!installedAppListUIState.isLoading && installedAppListUIState.data.isEmpty()) {
-            NoDataView(details = "There is no installed app available. Please installed few from google play store.")
+            NoDataView(details = InstalledAppStringAssets.NO_INSTALLED_APPS_AVAILABLE.value)
         }
     }
 }
